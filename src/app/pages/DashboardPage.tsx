@@ -1,0 +1,262 @@
+import { motion } from 'motion/react';
+import { Search, Filter, Calendar, MapPin, Star, Users, TrendingUp, Clock } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { events, categories } from '../../data/mockData';
+import { formatDate, formatPrice } from '../lib/utils';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+
+export function DashboardPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !selectedCategory || event.category === selectedCategory;
+    const matchesPrice = priceFilter === 'all' ||
+                        (priceFilter === 'free' && event.price === 0) ||
+                        (priceFilter === 'paid' && event.price > 0);
+
+    return matchesSearch && matchesCategory && matchesPrice;
+  });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Descubra Eventos</h1>
+          <p className="text-muted-foreground">
+            Encontre os melhores eventos da sua região
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <QuickStat
+            icon={<Calendar className="w-5 h-5" />}
+            label="Eventos Esta Semana"
+            value="156"
+            trend="+12%"
+          />
+          <QuickStat
+            icon={<TrendingUp className="w-5 h-5" />}
+            label="Em Alta"
+            value="42"
+            trend="+8%"
+          />
+          <QuickStat
+            icon={<Users className="w-5 h-5" />}
+            label="Participando"
+            value="12"
+          />
+          <QuickStat
+            icon={<Star className="w-5 h-5" />}
+            label="Favoritos"
+            value="8"
+          />
+        </div>
+
+        {/* Search and Filters */}
+        <Card className="p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Buscar eventos..."
+                icon={<Search className="w-4 h-4" />}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={priceFilter === 'all' ? 'primary' : 'outline'}
+                onClick={() => setPriceFilter('all')}
+                size="sm"
+              >
+                Todos
+              </Button>
+              <Button
+                variant={priceFilter === 'free' ? 'primary' : 'outline'}
+                onClick={() => setPriceFilter('free')}
+                size="sm"
+              >
+                Gratuitos
+              </Button>
+              <Button
+                variant={priceFilter === 'paid' ? 'primary' : 'outline'}
+                onClick={() => setPriceFilter('paid')}
+                size="sm"
+              >
+                Pagos
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2 flex-wrap">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                selectedCategory === null
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-accent hover:bg-accent/80'
+              }`}
+            >
+              Todas
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
+                  selectedCategory === category.name
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-accent hover:bg-accent/80'
+                }`}
+              >
+                <span>{category.icon}</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        {/* Events Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <EventSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <EventCard event={event} onClick={() => navigate(`/event/${event.id}`)} />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuickStat({ icon, label, value, trend }: { icon: React.ReactNode; label: string; value: string; trend?: string }) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          {icon}
+        </div>
+        {trend && (
+          <Badge variant="success" className="text-xs">
+            {trend}
+          </Badge>
+        )}
+      </div>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+    </Card>
+  );
+}
+
+function EventCard({ event, onClick }: { event: any; onClick: () => void }) {
+  return (
+    <Card hover onClick={onClick} className="overflow-hidden group">
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+        />
+        <div className="absolute top-4 left-4">
+          <Badge variant="primary">{event.category}</Badge>
+        </div>
+        {event.featured && (
+          <div className="absolute top-4 right-4">
+            <Badge variant="warning">⭐ Destaque</Badge>
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+          <div className="flex items-center gap-2 text-white text-sm">
+            <Calendar className="w-4 h-4" />
+            {formatDate(event.date)} às {event.time}
+          </div>
+        </div>
+      </div>
+      <div className="p-5">
+        <h3 className="font-bold text-lg mb-2 line-clamp-2">{event.title}</h3>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+          {event.description}
+        </p>
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="line-clamp-1">{event.location}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium">{event.rating}</span>
+            <span className="text-muted-foreground">({event.reviews})</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <span className="font-bold text-primary text-lg">{formatPrice(event.price)}</span>
+          <div className="text-sm">
+            <span className="font-medium">{event.confirmed}</span>
+            <span className="text-muted-foreground">/{event.capacity}</span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function EventSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="h-48 bg-muted animate-pulse"></div>
+      <div className="p-5 space-y-3">
+        <div className="h-6 bg-muted animate-pulse rounded"></div>
+        <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+        <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
+        <div className="flex justify-between pt-4">
+          <div className="h-6 bg-muted animate-pulse rounded w-20"></div>
+          <div className="h-6 bg-muted animate-pulse rounded w-16"></div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-16">
+      <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+        <Search className="w-12 h-12 text-muted-foreground" />
+      </div>
+      <h3 className="text-xl font-bold mb-2">Nenhum evento encontrado</h3>
+      <p className="text-muted-foreground mb-6">
+        Tente ajustar seus filtros ou buscar por outros termos
+      </p>
+      <Button variant="outline" onClick={() => window.location.reload()}>
+        Limpar Filtros
+      </Button>
+    </div>
+  );
+}
