@@ -1,38 +1,41 @@
+'use client';
+
 import { motion } from 'motion/react';
-import { Calendar, Search, User, Menu, X, Bell, LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Calendar, Menu, X, Bell, LogOut } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isLoggedIn = location.pathname !== '/' && location.pathname !== '/login';
+  const pathname = usePathname();
+  const router = useRouter();
+  const isLoggedIn = pathname !== '/' && pathname !== '/login';
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-2 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 EventHub
               </span>
-            </button>
+            </Link>
 
             {isLoggedIn && (
               <div className="hidden md:flex items-center gap-6">
-                <NavLink href="/dashboard" active={location.pathname === '/dashboard'}>
+                <NavLink href="/dashboard" active={pathname === '/dashboard'}>
                   Eventos
                 </NavLink>
-                <NavLink href="/organizer" active={location.pathname === '/organizer'}>
+                <NavLink href="/organizer" active={pathname === '/organizer'}>
                   Meus Eventos
                 </NavLink>
-                <NavLink href="/admin" active={location.pathname === '/admin'}>
+                <NavLink href="/admin" active={pathname === '/admin'}>
                   Admin
                 </NavLink>
               </div>
@@ -42,34 +45,37 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <button className="relative p-2 hover:bg-accent rounded-lg transition-colors">
+                <button type="button" className="relative p-2 hover:bg-accent rounded-lg transition-colors">
                   <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
                 </button>
-                <button onClick={() => navigate('/profile')} className="flex items-center gap-2 p-2 hover:bg-accent rounded-lg transition-colors">
+                <button
+                  type="button"
+                  onClick={() => router.push('/profile')}
+                  className="flex items-center gap-2 p-2 hover:bg-accent rounded-lg transition-colors"
+                >
                   <img
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
                     alt="User"
                     className="w-8 h-8 rounded-full"
                   />
                 </button>
-                <button className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground">
+                <button type="button" className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground">
                   <LogOut className="w-5 h-5" />
                 </button>
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate('/login')}>
+                <Button variant="ghost" onClick={() => router.push('/login')}>
                   Entrar
                 </Button>
-                <Button onClick={() => navigate('/login')}>
-                  Cadastrar
-                </Button>
+                <Button onClick={() => router.push('/login')}>Cadastrar</Button>
               </>
             )}
           </div>
 
           <button
+            type="button"
             className="md:hidden p-2 hover:bg-accent rounded-lg transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -87,10 +93,18 @@ export function Navbar() {
           <div className="px-4 py-4 space-y-2">
             {isLoggedIn ? (
               <>
-                <MobileNavLink href="/dashboard">Eventos</MobileNavLink>
-                <MobileNavLink href="/organizer">Meus Eventos</MobileNavLink>
-                <MobileNavLink href="/profile">Perfil</MobileNavLink>
-                <MobileNavLink href="/admin">Admin</MobileNavLink>
+                <MobileNavLink href="/dashboard" onNavigate={() => setMobileMenuOpen(false)}>
+                  Eventos
+                </MobileNavLink>
+                <MobileNavLink href="/organizer" onNavigate={() => setMobileMenuOpen(false)}>
+                  Meus Eventos
+                </MobileNavLink>
+                <MobileNavLink href="/profile" onNavigate={() => setMobileMenuOpen(false)}>
+                  Perfil
+                </MobileNavLink>
+                <MobileNavLink href="/admin" onNavigate={() => setMobileMenuOpen(false)}>
+                  Admin
+                </MobileNavLink>
                 <div className="pt-2 border-t border-border">
                   <Button variant="ghost" className="w-full justify-start">
                     Sair
@@ -99,10 +113,10 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" className="w-full" onClick={() => navigate('/login')}>
+                <Button variant="ghost" className="w-full" onClick={() => router.push('/login')}>
                   Entrar
                 </Button>
-                <Button className="w-full" onClick={() => navigate('/login')}>
+                <Button className="w-full" onClick={() => router.push('/login')}>
                   Cadastrar
                 </Button>
               </>
@@ -114,11 +128,18 @@ export function Navbar() {
   );
 }
 
-function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  const navigate = useNavigate();
+function NavLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <button
-      onClick={() => navigate(href)}
+    <Link
+      href={href}
       className={`relative px-3 py-2 text-sm font-medium transition-colors ${
         active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
       }`}
@@ -131,18 +152,26 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}
-    </button>
+    </Link>
   );
 }
 
-function MobileNavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const navigate = useNavigate();
+function MobileNavLink({
+  href,
+  children,
+  onNavigate,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onNavigate?: () => void;
+}) {
   return (
-    <button
-      onClick={() => navigate(href)}
+    <Link
+      href={href}
+      onClick={onNavigate}
       className="block w-full text-left px-3 py-2 rounded-lg hover:bg-accent text-foreground transition-colors"
     >
       {children}
-    </button>
+    </Link>
   );
 }

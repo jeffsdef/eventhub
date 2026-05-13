@@ -1,45 +1,60 @@
+'use client';
+
 import { motion } from 'motion/react';
-import { Search, Filter, Calendar, MapPin, Star, Users, TrendingUp, Clock } from 'lucide-react';
+import { Search, Calendar, MapPin, Star, Users, TrendingUp } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { events, categories } from '../../data/mockData';
+import { categories, type MockEvent } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { fetchMockEvents } from '../lib/mock-queries';
 
 export function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || event.category === selectedCategory;
-    const matchesPrice = priceFilter === 'all' ||
-                        (priceFilter === 'free' && event.price === 0) ||
-                        (priceFilter === 'paid' && event.price > 0);
-
-    return matchesSearch && matchesCategory && matchesPrice;
+  const { data: eventsData = [], isLoading, isError, error } = useQuery({
+    queryKey: ['events', 'mock'],
+    queryFn: fetchMockEvents,
   });
+
+  useEffect(() => {
+    if (isError && error instanceof Error) {
+      toast.error(`Não foi possível carregar os eventos: ${error.message}`);
+    }
+  }, [isError, error]);
+
+  const filteredEvents = useMemo(() => {
+    return eventsData.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = !selectedCategory || event.category === selectedCategory;
+      const matchesPrice =
+        priceFilter === 'all' ||
+        (priceFilter === 'free' && event.price === 0) ||
+        (priceFilter === 'paid' && event.price > 0);
+
+      return matchesSearch && matchesCategory && matchesPrice;
+    });
+  }, [eventsData, searchTerm, selectedCategory, priceFilter]);
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Descubra Eventos</h1>
-          <p className="text-muted-foreground">
-            Encontre os melhores eventos da sua região
-          </p>
+          <p className="text-muted-foreground">Encontre os melhores eventos da sua região</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <QuickStat
             icon={<Calendar className="w-5 h-5" />}
             label="Eventos Esta Semana"
@@ -52,22 +67,13 @@ export function DashboardPage() {
             value="42"
             trend="+8%"
           />
-          <QuickStat
-            icon={<Users className="w-5 h-5" />}
-            label="Participando"
-            value="12"
-          />
-          <QuickStat
-            icon={<Star className="w-5 h-5" />}
-            label="Favoritos"
-            value="8"
-          />
+          <QuickStat icon={<Users className="w-5 h-5" />} label="Participando" value="12" />
+          <QuickStat icon={<Star className="w-5 h-5" />} label="Favoritos" value="8" />
         </div>
 
-        {/* Search and Filters */}
-        <Card className="p-6 mb-8">
+        <Card className="p-4 sm:p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <Input
                 placeholder="Buscar eventos..."
                 icon={<Search className="w-4 h-4" />}
@@ -75,7 +81,7 @@ export function DashboardPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={priceFilter === 'all' ? 'primary' : 'outline'}
                 onClick={() => setPriceFilter('all')}
@@ -102,6 +108,7 @@ export function DashboardPage() {
 
           <div className="mt-4 flex gap-2 flex-wrap">
             <button
+              type="button"
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-xl text-sm transition-all ${
                 selectedCategory === null
@@ -114,6 +121,7 @@ export function DashboardPage() {
             {categories.map((category) => (
               <button
                 key={category.id}
+                type="button"
                 onClick={() => setSelectedCategory(category.name)}
                 className={`px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
                   selectedCategory === category.name
@@ -128,7 +136,6 @@ export function DashboardPage() {
           </div>
         </Card>
 
-        {/* Events Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -136,7 +143,13 @@ export function DashboardPage() {
             ))}
           </div>
         ) : filteredEvents.length === 0 ? (
-          <EmptyState />
+          <EmptyState
+            onClear={() => {
+              setSearchTerm('');
+              setSelectedCategory(null);
+              setPriceFilter('all');
+            }}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event, index) => (
@@ -146,7 +159,7 @@ export function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <EventCard event={event} onClick={() => navigate(`/event/${event.id}`)} />
+                <EventCard event={event} onClick={() => router.push(`/event/${event.id}`)} />
               </motion.div>
             ))}
           </div>
@@ -156,7 +169,17 @@ export function DashboardPage() {
   );
 }
 
-function QuickStat({ icon, label, value, trend }: { icon: React.ReactNode; label: string; value: string; trend?: string }) {
+function QuickStat({
+  icon,
+  label,
+  value,
+  trend,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend?: string;
+}) {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between mb-2">
@@ -175,7 +198,7 @@ function QuickStat({ icon, label, value, trend }: { icon: React.ReactNode; label
   );
 }
 
-function EventCard({ event, onClick }: { event: any; onClick: () => void }) {
+function EventCard({ event, onClick }: { event: MockEvent; onClick: () => void }) {
   return (
     <Card hover onClick={onClick} className="overflow-hidden group">
       <div className="relative h-48 overflow-hidden">
@@ -201,9 +224,7 @@ function EventCard({ event, onClick }: { event: any; onClick: () => void }) {
       </div>
       <div className="p-5">
         <h3 className="font-bold text-lg mb-2 line-clamp-2">{event.title}</h3>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {event.description}
-        </p>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{event.description}</p>
         <div className="space-y-2 mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 flex-shrink-0" />
@@ -230,31 +251,29 @@ function EventCard({ event, onClick }: { event: any; onClick: () => void }) {
 function EventSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="h-48 bg-muted animate-pulse"></div>
+      <div className="h-48 bg-muted animate-pulse" />
       <div className="p-5 space-y-3">
-        <div className="h-6 bg-muted animate-pulse rounded"></div>
-        <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
-        <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
+        <div className="h-6 bg-muted animate-pulse rounded" />
+        <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+        <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
         <div className="flex justify-between pt-4">
-          <div className="h-6 bg-muted animate-pulse rounded w-20"></div>
-          <div className="h-6 bg-muted animate-pulse rounded w-16"></div>
+          <div className="h-6 bg-muted animate-pulse rounded w-20" />
+          <div className="h-6 bg-muted animate-pulse rounded w-16" />
         </div>
       </div>
     </Card>
   );
 }
 
-function EmptyState() {
+function EmptyState({ onClear }: { onClear: () => void }) {
   return (
-    <div className="text-center py-16">
+    <div className="text-center py-16 px-4">
       <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
         <Search className="w-12 h-12 text-muted-foreground" />
       </div>
       <h3 className="text-xl font-bold mb-2">Nenhum evento encontrado</h3>
-      <p className="text-muted-foreground mb-6">
-        Tente ajustar seus filtros ou buscar por outros termos
-      </p>
-      <Button variant="outline" onClick={() => window.location.reload()}>
+      <p className="text-muted-foreground mb-6">Tente ajustar seus filtros ou buscar por outros termos</p>
+      <Button variant="outline" onClick={onClear}>
         Limpar Filtros
       </Button>
     </div>

@@ -1,17 +1,19 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { Plus, Calendar, Users, TrendingUp, DollarSign, Edit, Trash2, Eye, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { events, users } from '../../data/mockData';
+import { events, users } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export function OrganizerPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const organizer = users[0];
   const myEvents = events.filter(e => e.organizerId === organizer.id);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -200,7 +202,7 @@ export function OrganizerPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => navigate(`/event/${event.id}`)}
+                          onClick={() => router.push(`/event/${event.id}`)}
                           className="p-2 hover:bg-accent rounded-lg transition-colors"
                           title="Ver detalhes"
                         >

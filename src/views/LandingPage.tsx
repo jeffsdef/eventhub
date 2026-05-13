@@ -1,14 +1,16 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { Calendar, Users, Star, TrendingUp, ArrowRight, Search, MapPin, Clock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { events, categories } from '../../data/mockData';
+import { events, categories } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
-import { useNavigate } from 'react-router';
+import { useRouter } from 'next/navigation';
 
 export function LandingPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const featuredEvents = events.filter(e => e.featured).slice(0, 3);
 
   return (
@@ -32,11 +34,11 @@ export function LandingPage() {
               Descubra, participe e organize eventos incríveis. Tudo em um só lugar.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate('/dashboard')}>
+              <Button size="lg" onClick={() => router.push('/dashboard')}>
                 Explorar Eventos
                 <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate('/login')}>
+              <Button size="lg" variant="outline" onClick={() => router.push('/login')}>
                 Criar Evento
               </Button>
             </div>
@@ -97,7 +99,7 @@ export function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card hover onClick={() => navigate(`/event/${event.id}`)} className="overflow-hidden group">
+                <Card hover onClick={() => router.push(`/event/${event.id}`)} className="overflow-hidden group">
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={event.image}
@@ -139,7 +141,7 @@ export function LandingPage() {
             ))}
           </div>
           <div className="text-center mt-12">
-            <Button size="lg" variant="outline" onClick={() => navigate('/dashboard')}>
+            <Button size="lg" variant="outline" onClick={() => router.push('/dashboard')}>
               Ver Todos os Eventos
             </Button>
           </div>

@@ -1,14 +1,16 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { Users, Calendar, TrendingUp, DollarSign, Shield, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { platformStats, users, events, comments } from '../../data/mockData';
+import { platformStats, users, events, comments } from '@/data/mockData';
 import { formatDate } from '../lib/utils';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from 'react-toastify';
 
 export function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');

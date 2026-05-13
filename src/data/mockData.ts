@@ -269,3 +269,5 @@ export const platformStats = {
   totalRevenue: 'R$ 2.8M',
   growthRate: '+23%',
 };
+
+export type MockEvent = (typeof events)[number];

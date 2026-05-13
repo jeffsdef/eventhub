@@ -1,19 +1,21 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { User, Mail, MapPin, Calendar, Settings, Edit, Star, Heart } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { users, events, categories } from '../../data/mockData';
+import { users, events, categories } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const user = users[1];
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const confirmedEvents = events.slice(0, 4);
   const pastEvents = events.slice(4, 7);
@@ -167,7 +169,7 @@ export function ProfilePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {confirmedEvents.map((event) => (
-                    <EventCard key={event.id} event={event} onClick={() => navigate(`/event/${event.id}`)} />
+                    <EventCard key={event.id} event={event} onClick={() => router.push(`/event/${event.id}`)} />
                   ))}
                 </div>
               </Card>
@@ -188,7 +190,7 @@ export function ProfilePage() {
                   {pastEvents.map((event) => (
                     <div
                       key={event.id}
-                      onClick={() => navigate(`/event/${event.id}`)}
+                      onClick={() => router.push(`/event/${event.id}`)}
                       className="flex gap-4 p-4 rounded-xl hover:bg-accent cursor-pointer transition-colors"
                     >
                       <img
@@ -229,7 +231,7 @@ export function ProfilePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {events.slice(0, 2).map((event) => (
-                    <EventCard key={event.id} event={event} onClick={() => navigate(`/event/${event.id}`)} />
+                    <EventCard key={event.id} event={event} onClick={() => router.push(`/event/${event.id}`)} />
                   ))}
                 </div>
               </Card>

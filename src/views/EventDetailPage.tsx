@@ -1,18 +1,22 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { Calendar, MapPin, Users, Star, Clock, DollarSign, Share2, Heart, ArrowLeft, Send } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { events, comments, users } from '../../data/mockData';
+import { events, comments, users } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { toast } from 'sonner';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 export function EventDetailPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const params = useParams();
+  const router = useRouter();
+  const rawId = params?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const event = events.find(e => e.id === Number(id));
   const eventComments = comments.filter(c => c.eventId === Number(id));
   const organizer = users.find(u => u.id === event?.organizerId);
@@ -46,7 +50,7 @@ export function EventDetailPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => router.push('/dashboard')}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -301,7 +305,7 @@ export function EventDetailPage() {
                     <Card
                       key={relEvent.id}
                       hover
-                      onClick={() => navigate(`/event/${relEvent.id}`)}
+                      onClick={() => router.push(`/event/${relEvent.id}`)}
                       className="overflow-hidden cursor-pointer"
                     >
                       <div className="flex gap-3 p-3">
