@@ -1,12 +1,11 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Calendar, MapPin, Users, Star, Clock, DollarSign, Share2, Heart, ArrowLeft, Send } from 'lucide-react';
+import { Calendar, MapPin, Star, Clock, DollarSign, Share2, Heart, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
-import { events, comments, users } from '@/data/mockData';
+import { events, users } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -18,14 +17,10 @@ export function EventDetailPage() {
   const rawId = params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const event = events.find(e => e.id === Number(id));
-  const eventComments = comments.filter(c => c.eventId === Number(id));
   const organizer = users.find(u => u.id === event?.organizerId);
-  const relatedEvents = events.filter(e => e.category === event?.category && e.id !== event?.id).slice(0, 3);
 
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [newComment, setNewComment] = useState('');
-  const [rating, setRating] = useState(0);
 
   if (!event || !organizer) {
     return <div>Evento não encontrado</div>;
@@ -35,16 +30,6 @@ export function EventDetailPage() {
     setIsConfirmed(true);
     toast.success('Presença confirmada! Você receberá um email com os detalhes.');
   };
-
-  const handleSubmitComment = () => {
-    if (newComment.trim() && rating > 0) {
-      toast.success('Comentário enviado com sucesso!');
-      setNewComment('');
-      setRating(0);
-    }
-  };
-
-  const occupancyPercentage = (event.confirmed / event.capacity) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,9 +43,7 @@ export function EventDetailPage() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Hero Image */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -90,7 +73,6 @@ export function EventDetailPage() {
               </Card>
             </motion.div>
 
-            {/* Event Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -121,30 +103,9 @@ export function EventDetailPage() {
                   </p>
                 </div>
 
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Vagas Preenchidas</span>
-                    <span className="text-sm text-muted-foreground">
-                      {event.confirmed} / {event.capacity}
-                    </span>
-                  </div>
-                  <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${occupancyPercentage}%` }}
-                      transition={{ duration: 1, delay: 0.3 }}
-                      className={`h-full ${
-                        occupancyPercentage > 90 ? 'bg-destructive' :
-                        occupancyPercentage > 70 ? 'bg-yellow-500' :
-                        'bg-primary'
-                      }`}
-                    />
-                  </div>
-                </div>
               </Card>
             </motion.div>
 
-            {/* Organizer */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -175,76 +136,8 @@ export function EventDetailPage() {
                 </div>
               </Card>
             </motion.div>
-
-            {/* Comments */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="p-6">
-                <h3 className="font-bold mb-4">Comentários ({eventComments.length})</h3>
-
-                {/* Add Comment */}
-                <div className="mb-6 p-4 bg-muted/30 rounded-xl">
-                  <div className="flex gap-1 mb-3">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => setRating(star)}
-                        className="hover:scale-110 transition-transform"
-                      >
-                        <Star
-                          className={`w-6 h-6 ${
-                            star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Deixe seu comentário..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                    />
-                    <Button onClick={handleSubmitComment} disabled={!newComment.trim() || rating === 0}>
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Comments List */}
-                <div className="space-y-4">
-                  {eventComments.map((comment) => (
-                    <div key={comment.id} className="flex gap-4">
-                      <img
-                        src={comment.userAvatar}
-                        alt={comment.userName}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{comment.userName}</span>
-                          <div className="flex gap-0.5">
-                            {[...Array(comment.rating)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-1">{comment.comment}</p>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(comment.date)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </motion.div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -282,56 +175,9 @@ export function EventDetailPage() {
                     <span className="text-muted-foreground">Vagas restantes</span>
                     <span className="font-medium">{event.capacity - event.confirmed}</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Taxa de ocupação</span>
-                    <Badge variant={occupancyPercentage > 90 ? 'danger' : 'success'}>
-                      {occupancyPercentage.toFixed(0)}%
-                    </Badge>
-                  </div>
                 </div>
               </Card>
             </motion.div>
-
-            {/* Related Events */}
-            {relatedEvents.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h3 className="font-bold mb-4">Eventos Relacionados</h3>
-                <div className="space-y-4">
-                  {relatedEvents.map((relEvent) => (
-                    <Card
-                      key={relEvent.id}
-                      hover
-                      onClick={() => router.push(`/event/${relEvent.id}`)}
-                      className="overflow-hidden cursor-pointer"
-                    >
-                      <div className="flex gap-3 p-3">
-                        <img
-                          src={relEvent.image}
-                          alt={relEvent.title}
-                          className="w-20 h-20 rounded-lg object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm line-clamp-2 mb-1">
-                            {relEvent.title}
-                          </h4>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(relEvent.date)}
-                          </div>
-                          <div className="text-sm font-bold text-primary mt-1">
-                            {formatPrice(relEvent.price)}
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </motion.div>
-            )}
           </div>
         </div>
       </div>

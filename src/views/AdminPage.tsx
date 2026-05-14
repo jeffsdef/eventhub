@@ -6,9 +6,8 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { platformStats, users, events, comments } from '@/data/mockData';
+import { platformStats, users, events } from '@/data/mockData';
 import { formatDate } from '../lib/utils';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -18,15 +17,6 @@ export function AdminPage() {
 
   const pendingOrganizers = users.filter(u => u.role === 'organizer').slice(0, 3);
   const recentEvents = events.slice(0, 5);
-  const pendingComments = comments.slice(0, 4);
-
-  const growthData = [
-    { month: 'Jan', users: 38000, events: 980, revenue: 2100000 },
-    { month: 'Fev', users: 40000, events: 1050, revenue: 2300000 },
-    { month: 'Mar', users: 42000, events: 1120, revenue: 2500000 },
-    { month: 'Abr', users: 44000, events: 1200, revenue: 2650000 },
-    { month: 'Mai', users: 45632, events: 1247, revenue: 2800000 },
-  ];
 
   const handleApproveOrganizer = (userId: number) => {
     toast.success('Organizador aprovado com sucesso!');
@@ -36,18 +26,10 @@ export function AdminPage() {
     toast.error('Organizador rejeitado');
   };
 
-  const handleApproveComment = (commentId: number) => {
-    toast.success('Comentário aprovado');
-  };
-
-  const handleDeleteComment = (commentId: number) => {
-    toast.error('Comentário removido');
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <Shield className="w-6 h-6 text-white" />
@@ -58,80 +40,33 @@ export function AdminPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <AdminStatCard
             icon={<Users className="w-6 h-6" />}
             label="Total de Usuários"
             value={platformStats.totalUsers.toLocaleString('pt-BR')}
-            trend={platformStats.growthRate}
             color="bg-primary"
           />
           <AdminStatCard
             icon={<Calendar className="w-6 h-6" />}
             label="Total de Eventos"
             value={platformStats.totalEvents.toLocaleString('pt-BR')}
-            trend="+156 este mês"
             color="bg-secondary"
           />
           <AdminStatCard
             icon={<DollarSign className="w-6 h-6" />}
             label="Receita Total"
             value={platformStats.totalRevenue}
-            trend={platformStats.growthRate}
             color="bg-green-500"
           />
           <AdminStatCard
             icon={<TrendingUp className="w-6 h-6" />}
             label="Avaliação Média"
             value={platformStats.averageRating.toString()}
-            trend="⭐ Excelente"
             color="bg-yellow-500"
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="p-6">
-            <h3 className="font-bold mb-4">Crescimento de Usuários</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Line type="monotone" dataKey="users" stroke="#2563EB" strokeWidth={2} name="Usuários" />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="font-bold mb-4">Eventos Criados (Mensal)</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Bar dataKey="events" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-
-        {/* Alerts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <AlertCard
             icon={<AlertTriangle className="w-5 h-5" />}
@@ -153,7 +88,6 @@ export function AdminPage() {
           />
         </div>
 
-        {/* Tabs */}
         <Card className="overflow-hidden">
           <div className="border-b border-border">
             <div className="flex gap-4 px-6 py-4">
@@ -168,12 +102,6 @@ export function AdminPage() {
                 onClick={() => setSelectedTab('events')}
               >
                 Eventos Recentes
-              </TabButton>
-              <TabButton
-                active={selectedTab === 'comments'}
-                onClick={() => setSelectedTab('comments')}
-              >
-                Moderação de Comentários
               </TabButton>
             </div>
           </div>
@@ -281,60 +209,6 @@ export function AdminPage() {
                 </table>
               </div>
             )}
-
-            {selectedTab === 'comments' && (
-              <div className="space-y-4">
-                {pendingComments.map((comment, index) => (
-                  <motion.div
-                    key={comment.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="p-4 rounded-xl border border-border"
-                  >
-                    <div className="flex items-start gap-3 mb-3">
-                      <img
-                        src={comment.userAvatar}
-                        alt={comment.userName}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{comment.userName}</span>
-                          <div className="flex gap-0.5">
-                            {[...Array(comment.rating)].map((_, i) => (
-                              <span key={i}>⭐</span>
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">{comment.comment}</p>
-                        <span className="text-xs text-muted-foreground">
-                          Evento ID: {comment.eventId} • {formatDate(comment.date)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleApproveComment(comment.id)}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Aprovar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        <XCircle className="w-4 h-4" />
-                        Remover
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
           </div>
         </Card>
       </div>
@@ -342,11 +216,10 @@ export function AdminPage() {
   );
 }
 
-function AdminStatCard({ icon, label, value, trend, color }: {
+function AdminStatCard({ icon, label, value, color }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  trend: string;
   color: string;
 }) {
   return (
@@ -356,7 +229,6 @@ function AdminStatCard({ icon, label, value, trend, color }: {
       </div>
       <div className="text-2xl font-bold mb-1">{value}</div>
       <div className="text-sm text-muted-foreground mb-2">{label}</div>
-      <div className="text-xs text-green-600 font-medium">{trend}</div>
     </Card>
   );
 }

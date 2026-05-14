@@ -15,7 +15,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-secondary/5 to-background pt-20 pb-32">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -24,9 +24,6 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <Badge variant="primary" className="mb-6">
-              🎉 Plataforma #1 de Eventos Comunitários
-            </Badge>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
               Conecte-se aos Melhores Eventos da Sua Cidade
             </h1>
@@ -57,7 +54,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Categories */}
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -84,7 +80,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Featured Events */}
       <section className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -148,7 +143,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How it Works */}
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -178,7 +172,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-secondary text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold mb-4">Pronto para Começar?</h2>
@@ -191,7 +184,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-muted/30 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
