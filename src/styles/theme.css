@@ -10,7 +10,7 @@
   --popover-foreground: #0f172a;
   --primary: #2563EB;
   --primary-foreground: #ffffff;
-  --secondary: #8b5cf6;
+  --secondary: #2563EB;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
@@ -25,11 +25,6 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: #2563EB;
-  --chart-1: #2563EB;
-  --chart-2: #8b5cf6;
-  --chart-3: #06b6d4;
-  --chart-4: #10b981;
-  --chart-5: #f59e0b;
   --radius: 0.75rem;
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
@@ -127,11 +122,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
 
   html {
     font-size: var(--font-size);

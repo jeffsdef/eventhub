@@ -352,10 +352,6 @@ function OAuthBlock() {
           <Chrome className="w-4 h-4" />
           Google
         </Button>
-        <Button type="button" variant="outline" className="w-full">
-          <Github className="w-4 h-4" />
-          GitHub
-        </Button>
       </div>
     </>
   );

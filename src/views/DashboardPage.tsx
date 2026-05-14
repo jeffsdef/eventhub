@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Search, Calendar, MapPin, Star, Users, TrendingUp } from 'lucide-react';
+import { Search, Calendar, MapPin, Star } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
@@ -49,28 +49,6 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Descubra Eventos</h1>
-          <p className="text-muted-foreground">Encontre os melhores eventos da sua região</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <QuickStat
-            icon={<Calendar className="w-5 h-5" />}
-            label="Eventos Esta Semana"
-            value="156"
-            trend="+12%"
-          />
-          <QuickStat
-            icon={<TrendingUp className="w-5 h-5" />}
-            label="Em Alta"
-            value="42"
-            trend="+8%"
-          />
-          <QuickStat icon={<Users className="w-5 h-5" />} label="Participando" value="12" />
-          <QuickStat icon={<Star className="w-5 h-5" />} label="Favoritos" value="8" />
-        </div>
-
         <Card className="p-4 sm:p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 min-w-0">
@@ -166,35 +144,6 @@ export function DashboardPage() {
         )}
       </div>
     </div>
-  );
-}
-
-function QuickStat({
-  icon,
-  label,
-  value,
-  trend,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  trend?: string;
-}) {
-  return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-          {icon}
-        </div>
-        {trend && (
-          <Badge variant="success" className="text-xs">
-            {trend}
-          </Badge>
-        )}
-      </div>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm text-muted-foreground">{label}</div>
-    </Card>
   );
 }
 
