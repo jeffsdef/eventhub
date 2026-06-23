@@ -8,13 +8,13 @@ import {
   DollarSign,
   Image as ImageIcon,
   MapPin,
-  Tag,
   Type,
   Users,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import { CategorySelector } from '@/components/CategorySelector';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +23,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createEvent, getCategories, getCurrentUser } from '@/lib/api';
+import { resolveCategories } from '@/lib/categories';
 import { cn } from '@/lib/utils';
 
 const createEventSchema = z.object({
@@ -53,14 +54,18 @@ export function CreateEventPage() {
     queryFn: getCurrentUser,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: apiCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
 
+  const categories = resolveCategories(apiCategories);
+
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateEventValues>({
     resolver: zodResolver(createEventSchema),
@@ -95,6 +100,8 @@ export function CreateEventPage() {
   useEffect(() => {
     document.title = 'Criar Evento | EventHub';
   }, []);
+
+  const selectedCategory = watch('category');
 
   const onSubmit = (data: CreateEventValues) => {
     mutation.mutate({
@@ -165,27 +172,15 @@ export function CreateEventPage() {
                   <label className="block text-sm font-medium mb-2 text-foreground">
                     Categoria
                   </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                      <Tag className="w-4 h-4" />
-                    </div>
-                    <select
-                      {...register('category')}
-                      className={cn(
-                        'w-full pl-10 pr-4 py-2.5 rounded-xl border border-input bg-input-background',
-                        'text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                        'transition-all duration-200',
-                        errors.category && 'border-destructive focus:ring-destructive',
-                      )}
-                    >
-                      <option value="">Selecione uma categoria</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.name}>
-                          {category.icon} {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <CategorySelector
+                    categories={categories}
+                    selected={selectedCategory ? [selectedCategory] : []}
+                    onToggle={(categoryName) =>
+                      setValue('category', categoryName, { shouldValidate: true })
+                    }
+                    multiple={false}
+                    columns={3}
+                  />
                   {errors.category && (
                     <p className="mt-1.5 text-sm text-destructive">{errors.category.message}</p>
                   )}

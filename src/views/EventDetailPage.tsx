@@ -5,6 +5,7 @@ import { Calendar, MapPin, Star, Clock, DollarSign, Share2, Heart, ArrowLeft } f
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { CategoryBadge } from '@/components/CategoryBadge';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -91,7 +92,7 @@ export function EventDetailPage() {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-4 left-4">
-                    <Badge variant="primary">{event.category}</Badge>
+                    <CategoryBadge category={event.category} />
                   </div>
                   <div className="absolute top-4 right-4 flex gap-2">
                     <button

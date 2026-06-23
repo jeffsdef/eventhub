@@ -13,6 +13,8 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories, loginUser, registerUser } from '@/lib/api';
+import { resolveCategories } from '@/lib/categories';
+import { CategorySelector } from '@/components/CategorySelector';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -204,10 +206,12 @@ function RegisterFlow({
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [registerData, setRegisterData] = useState<RegisterValues | null>(null);
 
-  const { data: categories = [] } = useQuery({
+  const { data: apiCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
+
+  const categories = resolveCategories(apiCategories);
 
   const {
     register,
@@ -251,6 +255,7 @@ function RegisterFlow({
   };
 
   const toggleInterest = (interest: string) => {
+    if (!interest) return;
     setSelectedInterests((prev) =>
       prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest],
     );
@@ -272,23 +277,12 @@ function RegisterFlow({
           <p className="text-sm text-muted-foreground mb-4">
             Selecione suas categorias favoritas para receber recomendações personalizadas
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => toggleInterest(category.name)}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  selectedInterests.includes(category.name)
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <div className="text-sm font-medium">{category.name}</div>
-              </button>
-            ))}
-          </div>
+          <CategorySelector
+            categories={categories}
+            selected={selectedInterests}
+            onToggle={toggleInterest}
+            columns={3}
+          />
           <div className="flex gap-3 pt-4">
             <Button variant="outline" type="button" onClick={() => setStep(1)} className="flex-1">
               Voltar

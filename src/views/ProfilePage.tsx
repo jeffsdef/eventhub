@@ -5,6 +5,7 @@ import { Mail, Calendar, Edit, Star } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { CategoryBadge } from '@/components/CategoryBadge';
 import { Input } from '../components/ui/Input';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useEffect, useState } from 'react';
@@ -217,7 +218,7 @@ export function ProfilePage() {
                           {formatDate(event.date)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="primary" className="text-xs">{event.category}</Badge>
+                          <CategoryBadge category={event.category} className="text-xs" />
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-sm">{event.rating}</span>
@@ -258,7 +259,7 @@ function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
           className="w-full h-full object-cover"
         />
         <div className="absolute top-2 right-2">
-          <Badge variant="primary" className="text-xs">{event.category}</Badge>
+          <CategoryBadge category={event.category} className="text-xs" />
         </div>
       </div>
       <div className="p-4">

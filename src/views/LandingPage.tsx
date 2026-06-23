@@ -4,11 +4,14 @@ import { motion } from 'motion/react';
 import { Calendar, Users, Star, ArrowRight, Search, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories, getFeaturedEvents, getPlatformStats } from '@/lib/api';
+import { fallbackCategories, fallbackFeaturedEvents } from '@/data/landing-fallback';
+import { resolveCategories } from '@/lib/categories';
+import { CategoryBadge } from '@/components/CategoryBadge';
+import { ImageWithFallback } from '@/components/ImageWithFallback';
 
 export function LandingPage() {
   const router = useRouter();
@@ -27,6 +30,13 @@ export function LandingPage() {
     queryKey: ['platform-stats'],
     queryFn: getPlatformStats,
   });
+
+  const displayCategories = resolveCategories(
+    !loadingCategories && categories.length === 0 ? fallbackCategories : categories,
+  );
+
+  const displayFeaturedEvents =
+    !loadingEvents && featuredEvents.length === 0 ? fallbackFeaturedEvents : featuredEvents;
 
   return (
     <div className="min-h-screen">
@@ -88,25 +98,32 @@ export function LandingPage() {
             <p className="text-muted-foreground">Encontre eventos que combinam com você</p>
           </div>
           {loadingCategories ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="p-6 h-28 animate-pulse bg-muted" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="h-36 animate-pulse bg-muted" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.map((category, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {displayCategories.map((category, index) => (
                 <motion.div
                   key={category.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card hover className="p-6 text-center group">
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                      {category.icon}
+                  <Card hover className="overflow-hidden group">
+                    <div className="relative h-36">
+                      <ImageWithFallback
+                        src={category.icon}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                      <h3 className="absolute bottom-4 left-0 right-0 text-center font-semibold text-white">
+                        {category.name}
+                      </h3>
                     </div>
-                    <h3 className="font-medium">{category.name}</h3>
                   </Card>
                 </motion.div>
               ))}
@@ -129,7 +146,7 @@ export function LandingPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredEvents.map((event, index) => (
+              {displayFeaturedEvents.map((event, index) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -138,13 +155,13 @@ export function LandingPage() {
                 >
                   <Card hover onClick={() => router.push(`/event/${event.id}`)} className="overflow-hidden group">
                     <div className="relative h-48 overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={event.image}
                         alt={event.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute top-4 right-4">
-                        <Badge variant="primary">{event.category}</Badge>
+                        <CategoryBadge category={event.category} />
                       </div>
                     </div>
                     <div className="p-6">

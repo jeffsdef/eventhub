@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { CategoryBadge } from '@/components/CategoryBadge';
 import { formatDate, formatPrice } from '../lib/utils';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
@@ -132,7 +133,7 @@ export function OrganizerPage() {
                         {formatDate(event.date)}
                       </td>
                       <td className="px-6 py-4">
-                        <Badge variant="primary">{event.category}</Badge>
+                        <CategoryBadge category={event.category} />
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm">

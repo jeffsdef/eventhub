@@ -12,6 +12,9 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { getCategories, getEvents } from '@/lib/api';
+import { resolveCategories } from '@/lib/categories';
+import { CategoryIcon } from '@/components/CategoryIcon';
+import { CategoryBadge } from '@/components/CategoryBadge';
 import type { Event } from '@/types';
 
 export function DashboardPage() {
@@ -25,10 +28,12 @@ export function DashboardPage() {
     queryFn: getEvents,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: apiCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
+
+  const categories = resolveCategories(apiCategories);
 
   useEffect(() => {
     if (isError && error instanceof Error) {
@@ -112,7 +117,7 @@ export function DashboardPage() {
                     : 'bg-accent hover:bg-accent/80'
                 }`}
               >
-                <span>{category.icon}</span>
+                <CategoryIcon category={category} size="xs" />
                 <span>{category.name}</span>
               </button>
             ))}
@@ -162,7 +167,7 @@ function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute top-4 left-4">
-          <Badge variant="primary">{event.category}</Badge>
+          <CategoryBadge category={event.category} />
         </div>
         {event.featured && (
           <div className="absolute top-4 right-4">

@@ -5,6 +5,7 @@ import { Users, Calendar, TrendingUp, DollarSign, Shield, AlertTriangle, CheckCi
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { CategoryBadge } from '@/components/CategoryBadge';
 import { Input } from '../components/ui/Input';
 import { formatDate } from '../lib/utils';
 import { useState } from 'react';
@@ -243,7 +244,7 @@ export function AdminPage() {
                           <td className="px-4 py-3 text-sm">{event.organizer}</td>
                           <td className="px-4 py-3 text-sm">{formatDate(event.date)}</td>
                           <td className="px-4 py-3">
-                            <Badge variant="primary">{event.category}</Badge>
+                            <CategoryBadge category={event.category} />
                           </td>
                           <td className="px-4 py-3 text-sm">{event.confirmed}/{event.capacity}</td>
                           <td className="px-4 py-3">
