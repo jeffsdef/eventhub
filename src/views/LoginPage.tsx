@@ -179,6 +179,9 @@ function LoginCredentialsForm({
         <Button type="submit" className="w-full" isLoading={isLoading}>
           Entrar
         </Button>
+        <p className="text-xs text-center text-muted-foreground pt-1">
+          Demo: maria@example.com / demo123
+        </p>
       </form>
       <div className="text-center mt-6 text-sm">
         <span className="text-muted-foreground">Não tem uma conta?</span>

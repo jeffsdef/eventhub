@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api-config';
+import { getApiBaseUrl } from './api-config';
 import type {
   Category,
   Event,
@@ -47,15 +47,20 @@ export function clearAuthToken() {
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    cache: 'no-store',
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${getApiBaseUrl()}${path}`, {
+      cache: 'no-store',
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options?.headers,
+      },
+    });
+  } catch {
+    throw new Error('Não foi possível conectar ao servidor. Tente novamente.');
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
