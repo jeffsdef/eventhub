@@ -3,15 +3,27 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, Menu, X, Bell, LogOut } from 'lucide-react';
+import { Calendar, Menu, X, Bell, LogOut, User } from 'lucide-react';
 import { Button } from './ui/Button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { clearAuthToken, getAuthToken } from '@/lib/api';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const isLoggedIn = pathname !== '/' && pathname !== '/login';
+
+  useEffect(() => {
+    setIsLoggedIn(!!getAuthToken());
+  }, [pathname]);
+
+  const handleLogout = () => {
+    clearAuthToken();
+    setIsLoggedIn(false);
+    setMobileMenuOpen(false);
+    router.push('/login');
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -45,7 +57,12 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <button type="button" className="relative p-2 hover:bg-accent rounded-lg transition-colors">
+                <button
+                  type="button"
+                  onClick={() => router.push('/notifications')}
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                  aria-label="Notificações"
+                >
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
                 </button>
@@ -53,14 +70,16 @@ export function Navbar() {
                   type="button"
                   onClick={() => router.push('/profile')}
                   className="flex items-center gap-2 p-2 hover:bg-accent rounded-lg transition-colors"
+                  aria-label="Ir para perfil"
                 >
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
-                    alt="User"
-                    className="w-8 h-8 rounded-full"
-                  />
+                  <User className="w-5 h-5" />
                 </button>
-                <button type="button" className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground"
+                  aria-label="Sair"
+                >
                   <LogOut className="w-5 h-5" />
                 </button>
               </>
@@ -102,11 +121,14 @@ export function Navbar() {
                 <MobileNavLink href="/profile" onNavigate={() => setMobileMenuOpen(false)}>
                   Perfil
                 </MobileNavLink>
+                <MobileNavLink href="/notifications" onNavigate={() => setMobileMenuOpen(false)}>
+                  Notificações
+                </MobileNavLink>
                 <MobileNavLink href="/admin" onNavigate={() => setMobileMenuOpen(false)}>
                   Admin
                 </MobileNavLink>
                 <div className="pt-2 border-t border-border">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
                     Sair
                   </Button>
                 </div>

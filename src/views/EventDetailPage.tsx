@@ -5,31 +5,66 @@ import { Calendar, MapPin, Star, Clock, DollarSign, Share2, Heart, ArrowLeft } f
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { events, users } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { confirmEventPresence, getEventById, getUserById } from '@/lib/api';
+import { UserInitials } from '@/components/UserInitials';
 
 export function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const rawId = params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
-  const event = events.find(e => e.id === Number(id));
-  const organizer = users.find(u => u.id === event?.organizerId);
 
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  if (!event || !organizer) {
-    return <div>Evento não encontrado</div>;
+  const { data: event, isLoading, isError } = useQuery({
+    queryKey: ['events', id],
+    queryFn: () => getEventById(id!),
+    enabled: !!id,
+  });
+
+  const { data: organizer } = useQuery({
+    queryKey: ['users', event?.organizerId],
+    queryFn: () => getUserById(event!.organizerId),
+    enabled: !!event?.organizerId,
+  });
+
+  const confirmMutation = useMutation({
+    mutationFn: () => confirmEventPresence(event!.id),
+    onSuccess: () => {
+      setIsConfirmed(true);
+      toast.success('Presença confirmada! Você receberá um email com os detalhes.');
+    },
+    onError: (error: Error) => {
+      toast.error(`Não foi possível confirmar presença: ${error.message}`);
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8 animate-pulse">Carregando evento...</Card>
+      </div>
+    );
   }
 
-  const handleConfirmPresence = () => {
-    setIsConfirmed(true);
-    toast.success('Presença confirmada! Você receberá um email com os detalhes.');
-  };
+  if (isError || !event || !organizer) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <p className="mb-4">Evento não encontrado</p>
+          <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            Voltar para eventos
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,11 +149,7 @@ export function EventDetailPage() {
               <Card className="p-6">
                 <h3 className="font-bold mb-4">Organizador</h3>
                 <div className="flex items-center gap-4">
-                  <img
-                    src={organizer.avatar}
-                    alt={organizer.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
+                  <UserInitials name={organizer.name} size="md" />
                   <div className="flex-1">
                     <h4 className="font-bold">{organizer.name}</h4>
                     <p className="text-sm text-muted-foreground mb-2">{organizer.bio}</p>
@@ -154,8 +185,9 @@ export function EventDetailPage() {
                 <Button
                   className="w-full mb-3"
                   size="lg"
-                  onClick={handleConfirmPresence}
-                  disabled={isConfirmed}
+                  onClick={() => confirmMutation.mutate()}
+                  disabled={isConfirmed || confirmMutation.isPending}
+                  isLoading={confirmMutation.isPending}
                 >
                   {isConfirmed ? '✓ Presença Confirmada' : 'Confirmar Presença'}
                 </Button>

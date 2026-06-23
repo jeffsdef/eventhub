@@ -1,35 +1,95 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Mail, MapPin, Calendar, Edit, Star } from 'lucide-react';
+import { Mail, Calendar, Edit, Star } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { users, events } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getCurrentUser,
+  getUserConfirmedEvents,
+  getUserPastEvents,
+  updateCurrentUser,
+} from '@/lib/api';
+import type { Event } from '@/types';
+import { UserInitials } from '@/components/UserInitials';
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const user = users[1];
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const confirmedEvents = events.slice(0, 4);
-  const pastEvents = events.slice(4, 7);
-
-  const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    bio: user.bio,
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ['users', 'me'],
+    queryFn: getCurrentUser,
   });
 
-  const handleSave = () => {
-    toast.success('Perfil atualizado com sucesso!');
-    setIsEditing(false);
-  };
+  const { data: confirmedEvents = [] } = useQuery({
+    queryKey: ['users', 'me', 'events', 'confirmed'],
+    queryFn: getUserConfirmedEvents,
+    enabled: !!user,
+  });
+
+  const { data: pastEvents = [] } = useQuery({
+    queryKey: ['users', 'me', 'events', 'past'],
+    queryFn: getUserPastEvents,
+    enabled: !!user,
+  });
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    bio: '',
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+      });
+    }
+  }, [user]);
+
+  const updateMutation = useMutation({
+    mutationFn: () => updateCurrentUser(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      toast.success('Perfil atualizado com sucesso!');
+      setIsEditing(false);
+    },
+    onError: (error: Error) => {
+      toast.error(`Não foi possível atualizar o perfil: ${error.message}`);
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8 animate-pulse">Carregando perfil...</Card>
+      </div>
+    );
+  }
+
+  if (isError || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <p className="mb-4">Não foi possível carregar o perfil</p>
+          <Button variant="outline" onClick={() => router.push('/login')}>
+            Fazer login
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,16 +103,7 @@ export function ProfilePage() {
               <Card className="p-6">
                 <div className="text-center">
                   <div className="relative inline-block mb-4">
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-primary/10"
-                    />
-                    {isEditing && (
-                      <button className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    )}
+                    <UserInitials name={user.name} size="lg" className="mx-auto border-4 border-primary/10" />
                   </div>
 
                   {isEditing ? (
@@ -80,7 +131,7 @@ export function ProfilePage() {
                   )}
 
                   <Badge variant="primary" className="mb-4">
-                    {user.role === 'organizer' ? '📅 Organizador' : '👤 Participante'}
+                    📅 Organizador
                   </Badge>
 
                   <div className="flex items-center justify-center gap-1 mb-6">
@@ -96,7 +147,11 @@ export function ProfilePage() {
                       <Button variant="outline" onClick={() => setIsEditing(false)} className="flex-1">
                         Cancelar
                       </Button>
-                      <Button onClick={handleSave} className="flex-1">
+                      <Button
+                        onClick={() => updateMutation.mutate()}
+                        className="flex-1"
+                        isLoading={updateMutation.isPending}
+                      >
                         Salvar
                       </Button>
                     </div>
@@ -110,8 +165,6 @@ export function ProfilePage() {
 
                 <div className="mt-6 pt-6 border-t border-border space-y-3">
                   <InfoRow icon={<Mail />} label="Email" value={user.email} />
-                  <InfoRow icon={<Calendar />} label="Membro desde" value="Janeiro 2024" />
-                  <InfoRow icon={<MapPin />} label="Localização" value="São Paulo, SP" />
                 </div>
               </Card>
             </motion.div>
@@ -195,7 +248,7 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
   );
 }
 
-function EventCard({ event, onClick }: { event: any; onClick: () => void }) {
+function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
   return (
     <Card hover onClick={onClick} className="overflow-hidden">
       <div className="relative h-32">

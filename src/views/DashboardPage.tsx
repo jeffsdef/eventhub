@@ -6,13 +6,13 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { categories, type MockEvent } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { fetchMockEvents } from '../lib/mock-queries';
+import { getCategories, getEvents } from '@/lib/api';
+import type { Event } from '@/types';
 
 export function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,8 +21,13 @@ export function DashboardPage() {
   const router = useRouter();
 
   const { data: eventsData = [], isLoading, isError, error } = useQuery({
-    queryKey: ['events', 'mock'],
-    queryFn: fetchMockEvents,
+    queryKey: ['events'],
+    queryFn: getEvents,
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
   });
 
   useEffect(() => {
@@ -147,7 +152,7 @@ export function DashboardPage() {
   );
 }
 
-function EventCard({ event, onClick }: { event: MockEvent; onClick: () => void }) {
+function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
   return (
     <Card hover onClick={onClick} className="overflow-hidden group">
       <div className="relative h-48 overflow-hidden">

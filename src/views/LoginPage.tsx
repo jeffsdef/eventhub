@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Calendar, Mail, Lock, User, Github, Chrome } from 'lucide-react';
+import { Calendar, Mail, Lock, User } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
@@ -11,7 +11,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { categories } from '@/data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { getCategories, loginUser, registerUser } from '@/lib/api';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -131,11 +132,16 @@ function LoginCredentialsForm({
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = async (_data: LoginValues) => {
+  const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setIsLoading(false);
-    onSuccess();
+    try {
+      await loginUser({ email: data.email, password: data.password });
+      onSuccess();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Falha ao fazer login');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -172,7 +178,6 @@ function LoginCredentialsForm({
           Entrar
         </Button>
       </form>
-      <OAuthBlock />
       <div className="text-center mt-6 text-sm">
         <span className="text-muted-foreground">Não tem uma conta?</span>
         <button
@@ -197,6 +202,13 @@ function RegisterFlow({
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [registerData, setRegisterData] = useState<RegisterValues | null>(null);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
+  });
+
   const {
     register,
     handleSubmit,
@@ -206,10 +218,8 @@ function RegisterFlow({
     defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   });
 
-  const onSubmitStep1 = async (_data: RegisterValues) => {
-    setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setIsLoading(false);
+  const onSubmitStep1 = async (data: RegisterValues) => {
+    setRegisterData(data);
     setStep(2);
   };
 
@@ -218,10 +228,26 @@ function RegisterFlow({
       toast.warning('Selecione ao menos um interesse para continuar.');
       return;
     }
+    if (!registerData) return;
+
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setIsLoading(false);
-    onSuccess();
+    try {
+      await registerUser({
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        interests: selectedInterests,
+      });
+      await loginUser({
+        email: registerData.email,
+        password: registerData.password,
+      });
+      onSuccess();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Falha ao criar conta');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleInterest = (interest: string) => {
@@ -316,7 +342,6 @@ function RegisterFlow({
               Continuar
             </Button>
           </form>
-          <OAuthBlock />
         </>
       )}
 
@@ -332,27 +357,6 @@ function RegisterFlow({
           </button>
         </div>
       )}
-    </>
-  );
-}
-
-function OAuthBlock() {
-  return (
-    <>
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-card text-muted-foreground">Ou continue com</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Button type="button" variant="outline" className="w-full">
-          <Chrome className="w-4 h-4" />
-          Google
-        </Button>
-      </div>
     </>
   );
 }

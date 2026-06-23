@@ -6,25 +6,64 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
-import { platformStats, users, events } from '@/data/mockData';
 import { formatDate } from '../lib/utils';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  approveOrganizer,
+  getPendingOrganizers,
+  getPlatformStats,
+  getRecentEvents,
+  rejectOrganizer,
+} from '@/lib/api';
+import { UserInitials } from '@/components/UserInitials';
 
 export function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState<'organizers' | 'events' | 'comments'>('organizers');
+  const queryClient = useQueryClient();
 
-  const pendingOrganizers = users.filter(u => u.role === 'organizer').slice(0, 3);
-  const recentEvents = events.slice(0, 5);
+  const { data: platformStats } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: getPlatformStats,
+  });
 
-  const handleApproveOrganizer = (userId: number) => {
-    toast.success('Organizador aprovado com sucesso!');
-  };
+  const { data: pendingOrganizers = [], isLoading: loadingOrganizers } = useQuery({
+    queryKey: ['admin', 'organizers', 'pending'],
+    queryFn: getPendingOrganizers,
+  });
 
-  const handleRejectOrganizer = (userId: number) => {
-    toast.error('Organizador rejeitado');
-  };
+  const { data: recentEvents = [], isLoading: loadingEvents } = useQuery({
+    queryKey: ['admin', 'events', 'recent'],
+    queryFn: getRecentEvents,
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: approveOrganizer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizers', 'pending'] });
+      toast.success('Organizador aprovado com sucesso!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Não foi possível aprovar: ${error.message}`);
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: rejectOrganizer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizers', 'pending'] });
+      toast.error('Organizador rejeitado');
+    },
+    onError: (error: Error) => {
+      toast.error(`Não foi possível rejeitar: ${error.message}`);
+    },
+  });
+
+  const filteredOrganizers = pendingOrganizers.filter((organizer) =>
+    organizer.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,25 +83,25 @@ export function AdminPage() {
           <AdminStatCard
             icon={<Users className="w-6 h-6" />}
             label="Total de Usuários"
-            value={platformStats.totalUsers.toLocaleString('pt-BR')}
+            value={platformStats ? platformStats.totalUsers.toLocaleString('pt-BR') : '—'}
             color="bg-primary"
           />
           <AdminStatCard
             icon={<Calendar className="w-6 h-6" />}
             label="Total de Eventos"
-            value={platformStats.totalEvents.toLocaleString('pt-BR')}
+            value={platformStats ? platformStats.totalEvents.toLocaleString('pt-BR') : '—'}
             color="bg-secondary"
           />
           <AdminStatCard
             icon={<DollarSign className="w-6 h-6" />}
             label="Receita Total"
-            value={platformStats.totalRevenue}
+            value={platformStats?.totalRevenue ?? '—'}
             color="bg-green-500"
           />
           <AdminStatCard
             icon={<TrendingUp className="w-6 h-6" />}
             label="Avaliação Média"
-            value={platformStats.averageRating.toString()}
+            value={platformStats ? platformStats.averageRating.toString() : '—'}
             color="bg-yellow-500"
           />
         </div>
@@ -71,19 +110,19 @@ export function AdminPage() {
           <AlertCard
             icon={<AlertTriangle className="w-5 h-5" />}
             label="Pendente Aprovação"
-            value="12"
+            value={pendingOrganizers.length.toString()}
             color="bg-yellow-500"
           />
           <AlertCard
             icon={<Shield className="w-5 h-5" />}
             label="Comentários para Moderar"
-            value="8"
+            value="—"
             color="bg-blue-500"
           />
           <AlertCard
             icon={<Users className="w-5 h-5" />}
             label="Novos Organizadores"
-            value="5"
+            value={platformStats ? platformStats.totalOrganizers.toString() : '—'}
             color="bg-green-500"
           />
         </div>
@@ -117,96 +156,104 @@ export function AdminPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                {pendingOrganizers.map((organizer, index) => (
-                  <motion.div
-                    key={organizer.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-accent/50 transition-colors"
-                  >
-                    <img
-                      src={organizer.avatar}
-                      alt={organizer.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-bold">{organizer.name}</h4>
-                      <p className="text-sm text-muted-foreground mb-2">{organizer.bio}</p>
-                      <div className="flex items-center gap-3 text-sm">
-                        <Badge variant="primary">{organizer.eventsCreated} eventos</Badge>
-                        <span className="flex items-center gap-1">
-                          ⭐ {organizer.rating}
-                        </span>
+                {loadingOrganizers ? (
+                  <Card className="p-8 animate-pulse">Carregando organizadores...</Card>
+                ) : filteredOrganizers.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Nenhum organizador pendente</p>
+                ) : (
+                  filteredOrganizers.map((organizer, index) => (
+                    <motion.div
+                      key={organizer.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-accent/50 transition-colors"
+                    >
+                      <UserInitials name={organizer.name} size="md" />
+                      <div className="flex-1">
+                        <h4 className="font-bold">{organizer.name}</h4>
+                        <p className="text-sm text-muted-foreground mb-2">{organizer.bio}</p>
+                        <div className="flex items-center gap-3 text-sm">
+                          <Badge variant="primary">{organizer.eventsCreated} eventos</Badge>
+                          <span className="flex items-center gap-1">
+                            ⭐ {organizer.rating}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleApproveOrganizer(organizer.id)}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Aprovar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRejectOrganizer(organizer.id)}
-                      >
-                        <XCircle className="w-4 h-4" />
-                        Rejeitar
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => approveMutation.mutate(organizer.id)}
+                          disabled={approveMutation.isPending}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Aprovar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => rejectMutation.mutate(organizer.id)}
+                          disabled={rejectMutation.isPending}
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Rejeitar
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
               </div>
             )}
 
             {selectedTab === 'events' && (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/30">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Evento</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Organizador</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Data</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Categoria</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Participantes</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {recentEvents.map((event, index) => (
-                      <motion.tr
-                        key={event.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-muted/20"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={event.image}
-                              alt={event.title}
-                              className="w-10 h-10 rounded-lg object-cover"
-                            />
-                            <span className="font-medium line-clamp-1">{event.title}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm">{event.organizer}</td>
-                        <td className="px-4 py-3 text-sm">{formatDate(event.date)}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant="primary">{event.category}</Badge>
-                        </td>
-                        <td className="px-4 py-3 text-sm">{event.confirmed}/{event.capacity}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant="success">Ativo</Badge>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
+                {loadingEvents ? (
+                  <Card className="p-8 animate-pulse">Carregando eventos...</Card>
+                ) : (
+                  <table className="w-full">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Evento</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Organizador</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Data</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Categoria</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Participantes</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {recentEvents.map((event, index) => (
+                        <motion.tr
+                          key={event.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-muted/20"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={event.image}
+                                alt={event.title}
+                                className="w-10 h-10 rounded-lg object-cover"
+                              />
+                              <span className="font-medium line-clamp-1">{event.title}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm">{event.organizer}</td>
+                          <td className="px-4 py-3 text-sm">{formatDate(event.date)}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="primary">{event.category}</Badge>
+                          </td>
+                          <td className="px-4 py-3 text-sm">{event.confirmed}/{event.capacity}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="success">Ativo</Badge>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </div>

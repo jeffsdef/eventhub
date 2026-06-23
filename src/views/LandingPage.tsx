@@ -1,17 +1,32 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Calendar, Users, Star, TrendingUp, ArrowRight, Search, MapPin, Clock } from 'lucide-react';
+import { Calendar, Users, Star, ArrowRight, Search, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { events, categories } from '@/data/mockData';
 import { formatDate, formatPrice } from '../lib/utils';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { getCategories, getFeaturedEvents, getPlatformStats } from '@/lib/api';
 
 export function LandingPage() {
   const router = useRouter();
-  const featuredEvents = events.filter(e => e.featured).slice(0, 3);
+
+  const { data: featuredEvents = [], isLoading: loadingEvents } = useQuery({
+    queryKey: ['events', 'featured'],
+    queryFn: getFeaturedEvents,
+  });
+
+  const { data: categories = [], isLoading: loadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: getPlatformStats,
+  });
 
   return (
     <div className="min-h-screen">
@@ -47,9 +62,21 @@ export function LandingPage() {
             transition={{ delay: 0.2 }}
             className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
           >
-            <StatCard icon={<Calendar />} value="1.247" label="Eventos Ativos" />
-            <StatCard icon={<Users />} value="45.632" label="Participantes" />
-            <StatCard icon={<Star />} value="4.8" label="Avaliação Média" />
+            <StatCard
+              icon={<Calendar />}
+              value={stats ? stats.totalEvents.toLocaleString('pt-BR') : '—'}
+              label="Eventos Ativos"
+            />
+            <StatCard
+              icon={<Users />}
+              value={stats ? stats.totalUsers.toLocaleString('pt-BR') : '—'}
+              label="Participantes"
+            />
+            <StatCard
+              icon={<Star />}
+              value={stats ? stats.averageRating.toString() : '—'}
+              label="Avaliação Média"
+            />
           </motion.div>
         </div>
       </section>
@@ -60,23 +87,31 @@ export function LandingPage() {
             <h2 className="text-3xl font-bold mb-4">Explore por Categoria</h2>
             <p className="text-muted-foreground">Encontre eventos que combinam com você</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories.map((category, index) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card hover className="p-6 text-center group">
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                    {category.icon}
-                  </div>
-                  <h3 className="font-medium">{category.name}</h3>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          {loadingCategories ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="p-6 h-28 animate-pulse bg-muted" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {categories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card hover className="p-6 text-center group">
+                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
+                      {category.icon}
+                    </div>
+                    <h3 className="font-medium">{category.name}</h3>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -86,55 +121,63 @@ export function LandingPage() {
             <h2 className="text-3xl font-bold mb-4">Eventos em Destaque</h2>
             <p className="text-muted-foreground">Os eventos mais populares desta semana</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredEvents.map((event, index) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card hover onClick={() => router.push(`/event/${event.id}`)} className="overflow-hidden group">
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4">
-                      <Badge variant="primary">{event.category}</Badge>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="font-bold text-lg mb-2 line-clamp-2">{event.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {event.description}
-                    </p>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(event.date)}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span className="line-clamp-1">{event.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        {event.rating} ({event.reviews} avaliações)
+          {loadingEvents ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="h-96 animate-pulse bg-muted" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredEvents.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card hover onClick={() => router.push(`/event/${event.id}`)} className="overflow-hidden group">
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge variant="primary">{event.category}</Badge>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                      <span className="font-bold text-primary">{formatPrice(event.price)}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {event.confirmed}/{event.capacity} vagas
-                      </span>
+                    <div className="p-6">
+                      <h3 className="font-bold text-lg mb-2 line-clamp-2">{event.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {event.description}
+                      </p>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {formatDate(event.date)}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          {event.rating} ({event.reviews} avaliações)
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                        <span className="font-bold text-primary">{formatPrice(event.price)}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {event.confirmed}/{event.capacity} vagas
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
           <div className="text-center mt-12">
             <Button size="lg" variant="outline" onClick={() => router.push('/dashboard')}>
               Ver Todos os Eventos
@@ -178,7 +221,12 @@ export function LandingPage() {
           <p className="text-xl mb-8 text-white/90">
             Junte-se a milhares de pessoas que já estão aproveitando os melhores eventos
           </p>
-          <Button size="lg" variant="outline" className="bg-white text-primary hover:bg-white/90">
+          <Button
+            size="lg"
+            variant="outline"
+            className="bg-white text-primary hover:bg-white/90"
+            onClick={() => router.push('/login')}
+          >
             Criar Conta Grátis
           </Button>
         </div>
