@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 interface CardProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   hover?: boolean;
   onClick?: () => void;
