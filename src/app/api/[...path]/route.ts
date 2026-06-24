@@ -1,35 +1,68 @@
-import { handleApiRequest } from '@/server/router';
+import { NextRequest, NextResponse } from 'next/server';
 
-type RouteContext = { params: Promise<{ path: string[] }> };
+async function handleProxy(
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
+) {
+  try {
+    const { path } = await params;
+    const pathString = path.join('/');
 
-async function dispatch(request: Request, context: RouteContext) {
-  const { path } = await context.params;
-  return handleApiRequest(request, path, request.method);
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!backendUrl) {
+      return NextResponse.json(
+        { error: 'A variável de ambiente NEXT_PUBLIC_API_URL não está configurada na Vercel.' },
+        { status: 500 }
+      );
+    }
+
+    const cleanBackendUrl = backendUrl.replace(/\/$/, '');
+    const searchParams = request.nextUrl.search;
+    const targetUrl = `${cleanBackendUrl}/${pathString}${searchParams}`;
+
+    const headers = new Headers(request.headers);
+    
+    const parsedUrl = new URL(cleanBackendUrl);
+    headers.set('host', parsedUrl.host);
+
+    const fetchOptions: RequestInit = {
+      method: request.method,
+      headers: headers,
+    };
+
+    if (!['GET', 'HEAD'].includes(request.method)) {
+      const arrayBuffer = await request.arrayBuffer();
+      if (arrayBuffer.byteLength > 0) {
+        fetchOptions.body = arrayBuffer;
+      }
+    }
+
+    const response = await fetch(targetUrl, fetchOptions);
+
+    const responseBody = await response.arrayBuffer();
+
+    const responseHeaders = new Headers(response.headers);
+    
+    responseHeaders.delete('content-encoding');
+
+    return new NextResponse(responseBody, {
+      status: response.status,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    console.error('Erro interno no Proxy da API:', error);
+    return NextResponse.json(
+      { error: 'Erro de comunicação com o servidor backend.', details: String(error) },
+      { status: 502 }
+    );
+  }
 }
 
-export async function GET(request: Request, context: RouteContext) {
-  return dispatch(request, context);
-}
-
-export async function POST(request: Request, context: RouteContext) {
-  return dispatch(request, context);
-}
-
-export async function PATCH(request: Request, context: RouteContext) {
-  return dispatch(request, context);
-}
-
-export async function DELETE(request: Request, context: RouteContext) {
-  return dispatch(request, context);
-}
-
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-}
+export { 
+  handleProxy as GET, 
+  handleProxy as POST, 
+  handleProxy as PUT, 
+  handleProxy as DELETE, 
+  handleProxy as PATCH 
+};
