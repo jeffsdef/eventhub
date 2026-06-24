@@ -29,7 +29,6 @@ export function getCategoryByName(name: string): Category | undefined {
   return categoryByName.get(name.toLowerCase());
 }
 
-/** Garante Música, Tecnologia e Esportes com ícones em imagem em todo o app. */
 export function resolveCategories(apiCategories: Category[] = []): Category[] {
   return CORE_CATEGORIES.map((core) => {
     const fromApi = apiCategories.find(

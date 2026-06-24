@@ -1,10 +1,21 @@
+function isLocalhostUrl(url: string): boolean {
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(url);
+}
+
 export function getApiBaseUrl(): string {
   const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
-  if (configured) return configured;
+
+  const isBrowserLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1');
+
+  if (configured && (!isLocalhostUrl(configured) || isBrowserLocalhost)) {
+    return configured;
+  }
 
   if (typeof window !== 'undefined') {
-    // Em desenvolvimento local, prioriza a API NestJS na porta 3001
-    if (window.location.hostname === 'localhost') {
+    if (isBrowserLocalhost) {
       return 'http://localhost:3001';
     }
     return '/api';
@@ -14,8 +25,7 @@ export function getApiBaseUrl(): string {
     return `https://${process.env.VERCEL_URL}/api`;
   }
 
-  return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+  return 'http://localhost:3001';
 }
 
-/** @deprecated Use getApiBaseUrl() — mantido por compatibilidade. */
 export const API_BASE_URL = getApiBaseUrl();

@@ -180,5 +180,4 @@ export const SEED_USERS: Omit<User, 'id'>[] = [
   },
 ];
 
-/** Senha padrão das contas demo: demo123 */
 export const DEMO_PASSWORD = 'demo123';

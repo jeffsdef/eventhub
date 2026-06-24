@@ -1,7 +1,6 @@
 import type { Category, Event } from '@/types';
 import { CORE_CATEGORIES } from '@/lib/categories';
 
-/** Dados estáticos exibidos na landing quando a API não está disponível. */
 export const fallbackCategories: Category[] = CORE_CATEGORIES;
 
 export const fallbackFeaturedEvents: Event[] = [
