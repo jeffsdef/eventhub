@@ -9,7 +9,13 @@ dotenv.config();
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const connectionString = process.env.DATABASE_URL;
+    const pool = new Pool({
+      connectionString,
+      ssl: connectionString?.includes('supabase.co')
+        ? { rejectUnauthorized: false }
+        : undefined,
+    });
     const adapter = new PrismaPg(pool);
     super({ adapter });
   }
