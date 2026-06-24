@@ -21,6 +21,16 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
 
+const handleLogin = async (credentials: LoginPayload) => {
+  try {
+    await loginUser(credentials);
+    
+    router.push('/dashboard');
+  } catch (error) {
+    console.error("Erro no login:", error);
+  }
+};
+
 const registerSchema = z
   .object({
     name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),

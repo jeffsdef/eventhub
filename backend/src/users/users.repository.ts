@@ -14,10 +14,13 @@ export class UsersRepository {
     return this.prisma.user.findMany();
   }
 
-  async findById(id: number): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
-  }
-
+ async findById(id: number): Promise<User | null> {
+  return this.prisma.user.findUnique({
+    where: {
+      id: Number(id),
+    },
+  });
+}
   async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({ where: { id }, data });
   }

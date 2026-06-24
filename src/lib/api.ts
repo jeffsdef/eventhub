@@ -111,6 +111,7 @@ export function getCurrentUser() {
 }
 
 export function getUserById(id: number | string) {
+  if (!id) return;
   return apiFetch<User>(`/users/${id}`);
 }
 

@@ -25,7 +25,7 @@ export function getApiBaseUrl(): string {
     return `https://${process.env.VERCEL_URL}/api`;
   }
 
-  return 'http://localhost:3001';
+  return 'http://localhost:3000';
 }
 
 export const API_BASE_URL = getApiBaseUrl();

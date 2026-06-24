@@ -10,7 +10,8 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty({ message: 'A senha é obrigatória' })
-  passwordHash!: string;
+  password!: string;
+
   @IsString()
   @IsOptional()
   role?: string;

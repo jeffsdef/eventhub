@@ -23,7 +23,7 @@ export function OrganizerPage() {
 
   const { data: myEvents = [], isLoading: loadingEvents } = useQuery({
     queryKey: ['users', organizer?.id, 'events'],
-    queryFn: () => getOrganizerEvents(organizer!.id),
+    queryFn: () => getOrganizerEvents(organizer?.id as number | string),
     enabled: !!organizer?.id,
   });
 

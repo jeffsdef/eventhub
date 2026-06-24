@@ -34,13 +34,13 @@ export function ProfilePage() {
   const { data: confirmedEvents = [] } = useQuery({
     queryKey: ['users', 'me', 'events', 'confirmed'],
     queryFn: getUserConfirmedEvents,
-    enabled: !!user,
+    enabled: !!user && !!user.id, 
   });
 
   const { data: pastEvents = [] } = useQuery({
     queryKey: ['users', 'me', 'events', 'past'],
     queryFn: getUserPastEvents,
-    enabled: !!user,
+    enabled: !!user && !!user.id,
   });
 
   const [formData, setFormData] = useState({
