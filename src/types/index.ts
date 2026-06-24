@@ -57,7 +57,7 @@ export interface RegisterUserPayload {
 
 export interface LoginPayload {
   email: string;
-  password: string;
+  password?: string;
 }
 
 export interface UpdateUserPayload {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Calendar, Mail, Lock, User } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -10,26 +11,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories, loginUser, registerUser } from '@/lib/api';
 import { resolveCategories } from '@/lib/categories';
 import { CategorySelector } from '@/components/CategorySelector';
+import { LoginPayload } from '@/types';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
-
-const handleLogin = async (credentials: LoginPayload) => {
-  try {
-    await loginUser(credentials);
-    
-    router.push('/dashboard');
-  } catch (error) {
-    console.error("Erro no login:", error);
-  }
-};
 
 const registerSchema = z
   .object({
@@ -49,6 +40,16 @@ type RegisterValues = z.infer<typeof registerSchema>;
 export function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
+
+  const handleLogin = async (credentials: LoginPayload) => {
+  try {
+    await loginUser(credentials);
+    
+    router.push('/dashboard');
+  } catch (error) {
+    console.error("Erro no login:", error);
+  }
+  };
 
   useEffect(() => {
     document.title = 'Entrar | EventHub';
