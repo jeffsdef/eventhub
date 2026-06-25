@@ -20,18 +20,29 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
+  @Get('featured')
+  findFeatured() {
+    return this.eventsService.findFeatured();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/confirm')
+  confirmPresence(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.eventsService.confirmPresence(id, req.user.sub);
+  }
+
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(+id, updateEventDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateEventDto: UpdateEventDto) {
+    return this.eventsService.update(id, updateEventDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.eventsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.remove(id);
   }
 }

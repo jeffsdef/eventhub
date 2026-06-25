@@ -1,4 +1,6 @@
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventsService } from '../events/events.service';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -11,6 +13,14 @@ describe('UsersController', () => {
       providers: [
         {
           provide: UsersService,
+          useValue: {},
+        },
+        {
+          provide: EventsService,
+          useValue: {},
+        },
+        {
+          provide: JwtService,
           useValue: {},
         },
       ],

@@ -15,6 +15,9 @@ describe('UsersService', () => {
     findByEmail: jest.fn(),
     findAll: jest.fn(),
     findById: jest.fn(),
+    findPendingOrganizers: jest.fn(),
+    countAll: jest.fn(),
+    countOrganizers: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
   };
@@ -44,8 +47,17 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should hash password and create user', async () => {
-      const createUserDto = { name: 'Test User', email: 'test@test.com', passwordHash: 'password' };
-      const expectedUser = { id: 1, ...createUserDto, passwordHash: 'hashedPassword' };
+      const createUserDto = {
+        name: 'Test User',
+        email: 'test@test.com',
+        password: 'password',
+      };
+      const expectedUser = {
+        id: 1,
+        name: createUserDto.name,
+        email: createUserDto.email,
+        passwordHash: 'hashedPassword',
+      };
 
       (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
@@ -56,7 +68,8 @@ describe('UsersService', () => {
       expect(bcrypt.genSalt).toHaveBeenCalled();
       expect(bcrypt.hash).toHaveBeenCalledWith('password', 'salt');
       expect(repository.create).toHaveBeenCalledWith({
-        ...createUserDto,
+        name: createUserDto.name,
+        email: createUserDto.email,
         passwordHash: 'hashedPassword',
       });
       expect(result).toEqual(expectedUser);
@@ -104,5 +117,70 @@ describe('UsersService', () => {
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith(1);
     });
+  });
+
+  it('should return pending organizers', async () => {
+    const users = [{ id: 1, role: 'organizer', pendingApproval: true }];
+    repository.findPendingOrganizers.mockResolvedValue(users as any);
+
+    await expect(service.findPendingOrganizers()).resolves.toEqual(users);
+    expect(repository.findPendingOrganizers).toHaveBeenCalled();
+  });
+
+  it('should count users and organizers', async () => {
+    repository.countAll.mockResolvedValue(10);
+    repository.countOrganizers.mockResolvedValue(3);
+
+    await expect(service.countAll()).resolves.toBe(10);
+    await expect(service.countOrganizers()).resolves.toBe(3);
+  });
+
+  it('should update user without hashing when password is absent', async () => {
+    const user = { id: 1, name: 'Updated' };
+    repository.update.mockResolvedValue(user as any);
+
+    await expect(service.update(1, { name: 'Updated' })).resolves.toEqual(user);
+    expect(repository.update).toHaveBeenCalledWith(1, { name: 'Updated' });
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+  });
+
+  it('should hash password when updating user password', async () => {
+    const user = { id: 1, passwordHash: 'newHash' };
+    (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
+    (bcrypt.hash as jest.Mock).mockResolvedValue('newHash');
+    repository.update.mockResolvedValue(user as any);
+
+    await expect(service.update(1, { password: 'newPassword' })).resolves.toEqual(user);
+    expect(repository.update).toHaveBeenCalledWith(1, { passwordHash: 'newHash' });
+  });
+
+  it('should approve organizer requests', async () => {
+    const user = { id: 1, role: 'organizer', pendingApproval: false };
+    repository.update.mockResolvedValue(user as any);
+
+    await expect(service.approveOrganizer(1)).resolves.toEqual(user);
+    expect(repository.update).toHaveBeenCalledWith(1, {
+      role: 'organizer',
+      pendingApproval: false,
+    });
+  });
+
+  it('should reject organizer requests', async () => {
+    const user = { id: 1, role: 'user', pendingApproval: false };
+    repository.update.mockResolvedValue(user as any);
+
+    await expect(service.rejectOrganizer(1)).resolves.toEqual(user);
+    expect(repository.update).toHaveBeenCalledWith(1, {
+      role: 'user',
+      pendingApproval: false,
+    });
+  });
+
+  it('should remove a user', async () => {
+    const user = { id: 1 };
+    repository.remove.mockResolvedValue(user as any);
+
+    await expect(service.remove(1)).resolves.toEqual(user);
+    expect(repository.remove).toHaveBeenCalledWith(1);
   });
 });

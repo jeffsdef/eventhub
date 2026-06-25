@@ -1,8 +1,8 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
-  @IsNotEmpty({ message: 'O título é obrigatório' })
+  @IsNotEmpty({ message: 'O titulo e obrigatorio' })
   title!: string;
 
   @IsString()
@@ -10,11 +10,15 @@ export class CreateEventDto {
   description?: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'A categoria é obrigatória' })
+  @IsOptional()
+  image?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'A categoria e obrigatoria' })
   category!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'A data é obrigatória' })
+  @IsNotEmpty({ message: 'A data e obrigatoria' })
   date!: string;
 
   @IsString()
@@ -22,7 +26,7 @@ export class CreateEventDto {
   time?: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'A localização é obrigatória' })
+  @IsNotEmpty({ message: 'A localizacao e obrigatoria' })
   location!: string;
 
   @IsNumber()

@@ -14,13 +14,24 @@ export class UsersRepository {
     return this.prisma.user.findMany();
   }
 
- async findById(id: number): Promise<User | null> {
-  return this.prisma.user.findUnique({
-    where: {
-      id: Number(id),
-    },
-  });
-}
+  async findById(id: number): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async findPendingOrganizers(): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: { role: 'organizer', pendingApproval: true },
+    });
+  }
+
+  async countAll(): Promise<number> {
+    return this.prisma.user.count();
+  }
+
+  async countOrganizers(): Promise<number> {
+    return this.prisma.user.count({ where: { role: 'organizer' } });
+  }
+
   async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({ where: { id }, data });
   }

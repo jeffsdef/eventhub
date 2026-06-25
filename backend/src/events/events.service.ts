@@ -7,33 +7,90 @@ import { EventsRepository } from './events.repository';
 export class EventsService {
   constructor(private eventsRepository: EventsRepository) {}
 
-  create(createEventDto: CreateEventDto, organizerId: number) {
+  async create(createEventDto: CreateEventDto, organizerId: number) {
     const { description, ...restData } = createEventDto;
-    
-    return this.eventsRepository.create({
+
+    const event = await this.eventsRepository.create({
       ...restData,
       description: description ?? '',
       organizer: { connect: { id: organizerId } },
     });
+
+    return this.serializeEvent(event);
   }
 
-  findAll() {
-    return this.eventsRepository.findAll();
+  async findAll() {
+    const events = await this.eventsRepository.findAll();
+    return this.serializeEvents(events);
+  }
+
+  async findFeatured() {
+    const events = await this.eventsRepository.findFeatured();
+    return this.serializeEvents(events);
+  }
+
+  async findRecent() {
+    const events = await this.eventsRepository.findRecent();
+    return this.serializeEvents(events);
+  }
+
+  async findByOrganizer(organizerId: number) {
+    const events = await this.eventsRepository.findByOrganizerId(organizerId);
+    return this.serializeEvents(events);
+  }
+
+  async findConfirmedByUser(userId: number) {
+    const events = await this.eventsRepository.findConfirmedByUserId(userId);
+    return this.serializeEvents(events);
+  }
+
+  async findPastConfirmedByUser(userId: number) {
+    const events = await this.eventsRepository.findPastConfirmedByUserId(userId);
+    return this.serializeEvents(events);
   }
 
   async findOne(id: number) {
     const event = await this.eventsRepository.findById(id);
     if (!event) {
-      throw new NotFoundException(`Evento com ID ${id} não encontrado`);
+      throw new NotFoundException(`Evento com ID ${id} nao encontrado`);
     }
-    return event;
+    return this.serializeEvent(event);
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
+  async confirmPresence(eventId: number, userId: number) {
+    await this.findOne(eventId);
+    const event = await this.eventsRepository.confirmPresence(eventId, userId);
+    return this.serializeEvent(event);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  async update(id: number, updateEventDto: UpdateEventDto) {
+    await this.findOne(id);
+    const event = await this.eventsRepository.update(id, updateEventDto);
+    return this.serializeEvent(event);
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    const event = await this.eventsRepository.remove(id);
+    return this.serializeEvent(event);
+  }
+
+  private serializeEvents(events: any[]) {
+    return events.map((event) => this.serializeEvent(event));
+  }
+
+  private serializeEvent(event: any) {
+    const { confirmedUsers, organizer, ...rest } = event;
+    const serialized = { ...rest };
+
+    if ('organizer' in event) {
+      serialized.organizer = typeof organizer === 'string' ? organizer : organizer?.name ?? '';
+    }
+
+    if ('confirmedUsers' in event) {
+      serialized.confirmed = Array.isArray(confirmedUsers) ? confirmedUsers.length : 0;
+    }
+
+    return serialized;
   }
 }
