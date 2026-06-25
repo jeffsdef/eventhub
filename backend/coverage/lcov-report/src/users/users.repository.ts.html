@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">23.07% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/13</span>
+                <span class='fraction'>13/13</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -109,50 +109,50 @@
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<a name='L47'></a><a href='#L47'>47</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Injectable } from '@nestjs/common';
@@ -161,44 +161,44 @@ import { Prisma, User } from '@prisma/client';
 &nbsp;
 @Injectable()
 export class UsersRepository {
-<span class="fstat-no" title="function not covered" >  constructor(private <span class="cstat-no" title="statement not covered" >p</span>risma: P</span>rismaService<span class="branch-1 cbranch-no" title="branch not covered" >) {}</span>
+  constructor(private prisma: PrismaService<span class="branch-1 cbranch-no" title="branch not covered" >) {}</span>
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>create(data: Prisma.UserCreateInput): Promise&lt;User&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.create({ data });</span>
+  async create(data: Prisma.UserCreateInput): Promise&lt;User&gt; {
+    return this.prisma.user.create({ data });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>findAll(): Promise&lt;User[]&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.findMany();</span>
+  async findAll(): Promise&lt;User[]&gt; {
+    return this.prisma.user.findMany();
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>findById(id: number): Promise&lt;User | null&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.findUnique({ where: { id } });</span>
+  async findById(id: number): Promise&lt;User | null&gt; {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>findPendingOrganizers(): Promise&lt;User[]&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.findMany({</span>
+  async findPendingOrganizers(): Promise&lt;User[]&gt; {
+    return this.prisma.user.findMany({
       where: { role: 'organizer', pendingApproval: true },
     });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>countAll(): Promise&lt;number&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.count();</span>
+  async countAll(): Promise&lt;number&gt; {
+    return this.prisma.user.count();
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>countOrganizers(): Promise&lt;number&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.count({ where: { role: 'organizer' } });</span>
+  async countOrganizers(): Promise&lt;number&gt; {
+    return this.prisma.user.count({ where: { role: 'organizer' } });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>update(id: number, data: Prisma.UserUpdateInput): Promise&lt;User&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.update({ where: { id }, data });</span>
+  async update(id: number, data: Prisma.UserUpdateInput): Promise&lt;User&gt; {
+    return this.prisma.user.update({ where: { id }, data });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>remove(id: number): Promise&lt;User&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.delete({ where: { id } });</span>
+  async remove(id: number): Promise&lt;User&gt; {
+    return this.prisma.user.delete({ where: { id } });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>findByEmail(email: string): Promise&lt;User | null&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.user.findUnique({ where: { email } });</span>
+  async findByEmail(email: string): Promise&lt;User | null&gt; {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -208,7 +208,7 @@ export class UsersRepository {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-25T01:16:02.860Z
+                at 2026-06-25T01:36:04.124Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

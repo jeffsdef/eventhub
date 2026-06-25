@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1782350162917" clover="3.2.0">
-  <project timestamp="1782350162917" name="All files">
-    <metrics statements="337" coveredstatements="207" conditionals="139" coveredconditionals="81" methods="99" coveredmethods="47" elements="575" coveredelements="335" complexity="0" loc="337" ncloc="337" packages="13" files="31" classes="31"/>
+<coverage generated="1782351364171" clover="3.2.0">
+  <project timestamp="1782351364171" name="All files">
+    <metrics statements="337" coveredstatements="229" conditionals="139" coveredconditionals="82" methods="99" coveredmethods="69" elements="575" coveredelements="380" complexity="0" loc="337" ncloc="337" packages="13" files="31" classes="31"/>
     <package name="src">
       <metrics statements="31" coveredstatements="9" conditionals="10" coveredconditionals="3" methods="4" coveredmethods="3"/>
       <file name="app.controller.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\app.controller.ts">
@@ -202,7 +202,7 @@
       </file>
     </package>
     <package name="src.events">
-      <metrics statements="83" coveredstatements="56" conditionals="35" coveredconditionals="21" methods="35" coveredmethods="16"/>
+      <metrics statements="83" coveredstatements="68" conditionals="35" coveredconditionals="22" methods="35" coveredmethods="28"/>
       <file name="events.controller.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\events\events.controller.ts">
         <metrics statements="22" coveredstatements="14" conditionals="12" coveredconditionals="9" methods="8" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
@@ -237,23 +237,23 @@
         <line num="11" count="0" type="stmt"/>
       </file>
       <file name="events.repository.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\events\events.repository.ts">
-        <metrics statements="16" coveredstatements="4" conditionals="5" coveredconditionals="3" methods="12" coveredmethods="0"/>
-        <line num="1" count="4" type="stmt"/>
-        <line num="2" count="4" type="stmt"/>
-        <line num="5" count="4" type="stmt"/>
-        <line num="11" count="4" type="stmt"/>
-        <line num="12" count="0" type="cond" truecount="3" falsecount="1"/>
-        <line num="15" count="0" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="38" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
-        <line num="52" count="0" type="stmt"/>
-        <line num="59" count="0" type="stmt"/>
-        <line num="69" count="0" type="stmt"/>
-        <line num="77" count="0" type="stmt"/>
-        <line num="85" count="0" type="stmt"/>
+        <metrics statements="16" coveredstatements="16" conditionals="5" coveredconditionals="4" methods="12" coveredmethods="12"/>
+        <line num="1" count="5" type="stmt"/>
+        <line num="2" count="5" type="stmt"/>
+        <line num="5" count="5" type="stmt"/>
+        <line num="11" count="5" type="stmt"/>
+        <line num="12" count="14" type="cond" truecount="3" falsecount="1"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="59" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="85" count="1" type="stmt"/>
       </file>
       <file name="events.service.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\events\events.service.ts">
         <metrics statements="40" coveredstatements="38" conditionals="18" coveredconditionals="9" methods="15" coveredmethods="15"/>
@@ -340,13 +340,13 @@
       </file>
       <file name="prisma.service.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\prisma\prisma.service.ts">
         <metrics statements="12" coveredstatements="11" conditionals="2" coveredconditionals="1" methods="2" coveredmethods="1"/>
-        <line num="1" count="8" type="stmt"/>
-        <line num="2" count="8" type="stmt"/>
-        <line num="3" count="8" type="stmt"/>
-        <line num="4" count="8" type="stmt"/>
-        <line num="5" count="8" type="stmt"/>
-        <line num="7" count="8" type="stmt"/>
-        <line num="10" count="8" type="stmt"/>
+        <line num="1" count="10" type="stmt"/>
+        <line num="2" count="10" type="stmt"/>
+        <line num="3" count="10" type="stmt"/>
+        <line num="4" count="10" type="stmt"/>
+        <line num="5" count="10" type="stmt"/>
+        <line num="7" count="10" type="stmt"/>
+        <line num="10" count="10" type="stmt"/>
         <line num="12" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
         <line num="19" count="1" type="stmt"/>
@@ -355,7 +355,7 @@
       </file>
     </package>
     <package name="src.users">
-      <metrics statements="75" coveredstatements="49" conditionals="32" coveredconditionals="25" methods="33" coveredmethods="13"/>
+      <metrics statements="75" coveredstatements="59" conditionals="32" coveredconditionals="25" methods="33" coveredmethods="23"/>
       <file name="users.controller.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\users\users.controller.ts">
         <metrics statements="29" coveredstatements="19" conditionals="20" coveredconditionals="15" methods="11" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
@@ -398,20 +398,20 @@
         <line num="13" count="0" type="stmt"/>
       </file>
       <file name="users.repository.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\users\users.repository.ts">
-        <metrics statements="13" coveredstatements="3" conditionals="4" coveredconditionals="3" methods="10" coveredmethods="0"/>
-        <line num="1" count="5" type="stmt"/>
-        <line num="2" count="5" type="stmt"/>
-        <line num="6" count="5" type="stmt"/>
-        <line num="7" count="0" type="cond" truecount="3" falsecount="1"/>
-        <line num="10" count="0" type="stmt"/>
-        <line num="14" count="0" type="stmt"/>
-        <line num="18" count="0" type="stmt"/>
-        <line num="22" count="0" type="stmt"/>
-        <line num="28" count="0" type="stmt"/>
-        <line num="32" count="0" type="stmt"/>
-        <line num="36" count="0" type="stmt"/>
-        <line num="40" count="0" type="stmt"/>
-        <line num="44" count="0" type="stmt"/>
+        <metrics statements="13" coveredstatements="13" conditionals="4" coveredconditionals="3" methods="10" coveredmethods="10"/>
+        <line num="1" count="6" type="stmt"/>
+        <line num="2" count="6" type="stmt"/>
+        <line num="6" count="6" type="stmt"/>
+        <line num="7" count="12" type="cond" truecount="3" falsecount="1"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="18" count="2" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="44" count="2" type="stmt"/>
       </file>
       <file name="users.service.ts" path="C:\Users\jeffe\OneDrive\Documentos\projects\eventhub\backend\src\users\users.service.ts">
         <metrics statements="27" coveredstatements="27" conditionals="8" coveredconditionals="7" methods="12" coveredmethods="12"/>
