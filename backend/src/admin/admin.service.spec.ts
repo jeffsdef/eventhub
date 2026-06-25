@@ -56,8 +56,8 @@ describe('AdminService', () => {
 
   it('should calculate platform stats', async () => {
     eventsService.findAll.mockResolvedValue([
-      { id: 1, date: '2026-06-10', rating: 4, price: 10, confirmedUsers: [{ id: 1 }, { id: 2 }] },
-      { id: 2, date: '2026-05-10', rating: 2, price: 5, confirmedUsers: [] },
+      { id: 1, date: '2026-06-10', rating: 4, price: 10, confirmed: 2 },
+      { id: 2, date: '2026-05-10', rating: 2, price: 5, confirmed: 0 },
     ] as any);
     usersService.countAll.mockResolvedValue(20);
     usersService.countOrganizers.mockResolvedValue(4);

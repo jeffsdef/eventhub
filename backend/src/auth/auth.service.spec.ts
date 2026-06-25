@@ -14,6 +14,7 @@ describe('AuthService', () => {
 
   const mockUsersService = {
     findByEmail: jest.fn(),
+    findOne: jest.fn(),
   };
 
   const mockJwtService = {
@@ -57,6 +58,18 @@ describe('AuthService', () => {
       passwordHash: 'hashedPassword',
     };
     usersService.findByEmail.mockResolvedValue(user as any);
+    usersService.findOne.mockResolvedValue({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: '',
+      bio: '',
+      eventsCreated: 0,
+      eventsAttended: 0,
+      rating: 0,
+      interests: [],
+    } as any);
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     jwtService.signAsync.mockResolvedValue('jwt-token');
 
@@ -76,6 +89,12 @@ describe('AuthService', () => {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar: '',
+        bio: '',
+        eventsCreated: 0,
+        eventsAttended: 0,
+        rating: 0,
+        interests: [],
       },
     });
   });

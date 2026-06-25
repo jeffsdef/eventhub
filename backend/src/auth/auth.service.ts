@@ -22,11 +22,10 @@ export class AuthService {
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const { passwordHash, ...publicUser } = user;
 
     return {
       accessToken: await this.jwtService.signAsync(payload),
-      user: publicUser,
+      user: await this.usersService.findOne(user.id),
     };
   }
 }

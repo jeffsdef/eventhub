@@ -10,8 +10,21 @@ let server: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  const frontendUrl = process.env.FRONTEND_URL ?? 'https://eventhub-ten-liard.vercel.app';
+  const allowedOrigins = new Set([
+    frontendUrl,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ]);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? '*',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
     credentials: true,
   });
   await app.init();

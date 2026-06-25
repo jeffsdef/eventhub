@@ -29,7 +29,7 @@ export function EventDetailPage() {
     enabled: !!id,
   });
 
-  const { data: organizer } = useQuery({
+  const { data: organizer, isLoading: loadingOrganizer } = useQuery({
     queryKey: ['users', event?.organizerId],
     queryFn: () => getUserById(event!.organizerId),
     enabled: !!event?.organizerId,
@@ -46,7 +46,7 @@ export function EventDetailPage() {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || loadingOrganizer) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 animate-pulse">Carregando evento...</Card>
@@ -54,7 +54,7 @@ export function EventDetailPage() {
     );
   }
 
-  if (isError || !event || !organizer) {
+  if (isError || !event) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -149,23 +149,29 @@ export function EventDetailPage() {
             >
               <Card className="p-6">
                 <h3 className="font-bold mb-4">Organizador</h3>
-                <div className="flex items-center gap-4">
-                  <UserInitials name={organizer.name} size="md" />
-                  <div className="flex-1">
-                    <h4 className="font-bold">{organizer.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-2">{organizer.bio}</p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span>{organizer.rating}</span>
+                {organizer ? (
+                  <div className="flex items-center gap-4">
+                    <UserInitials name={organizer.name} size="md" />
+                    <div className="flex-1">
+                      <h4 className="font-bold">{organizer.name}</h4>
+                      <p className="text-sm text-muted-foreground mb-2">{organizer.bio}</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span>{organizer.rating}</span>
+                        </div>
+                        <span className="text-muted-foreground">
+                          {organizer.eventsCreated} eventos criados
+                        </span>
                       </div>
-                      <span className="text-muted-foreground">
-                        {organizer.eventsCreated} eventos criados
-                      </span>
                     </div>
+                    <Button variant="outline">Seguir</Button>
                   </div>
-                  <Button variant="outline">Seguir</Button>
-                </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Organizador: {event.organizer || 'Não informado'}
+                  </p>
+                )}
               </Card>
             </motion.div>
           </div>

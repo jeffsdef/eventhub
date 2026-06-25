@@ -21,11 +21,15 @@ export function getApiBaseUrl(): string {
     return '/api';
   }
 
+  if (configured) {
+    return configured;
+  }
+
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}/api`;
   }
 
-  return 'http://localhost:3000';
+  return 'http://localhost:3001';
 }
 
 export const API_BASE_URL = getApiBaseUrl();

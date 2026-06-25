@@ -6,6 +6,35 @@ import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
 
+const userStatsInclude = {
+  include: {
+    _count: {
+      select: {
+        eventsCreated: true,
+        eventsConfirmed: true,
+      },
+    },
+  },
+};
+
+function withStats(user: Record<string, unknown>) {
+  return {
+    ...user,
+    _count: { eventsCreated: 0, eventsConfirmed: 0 },
+  };
+}
+
+function publicUser(user: Record<string, unknown>) {
+  const { passwordHash, pendingApproval, ...rest } = user;
+  return {
+    ...rest,
+    avatar: '',
+    bio: '',
+    eventsCreated: 0,
+    eventsAttended: 0,
+  };
+}
+
 describe('UsersService', () => {
   let service: UsersService;
   let repository: jest.Mocked<UsersRepository>;
@@ -52,16 +81,22 @@ describe('UsersService', () => {
         email: 'test@test.com',
         password: 'password',
       };
-      const expectedUser = {
+      const expectedUser = publicUser({
         id: 1,
         name: createUserDto.name,
         email: createUserDto.email,
-        passwordHash: 'hashedPassword',
-      };
+      });
 
       (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-      repository.create.mockResolvedValue(expectedUser as any);
+      repository.create.mockResolvedValue(
+        withStats({
+          id: 1,
+          name: createUserDto.name,
+          email: createUserDto.email,
+          passwordHash: 'hashedPassword',
+        }) as any,
+      );
 
       const result = await service.create(createUserDto);
 
@@ -90,25 +125,25 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     it('should return an array of users', async () => {
-      const users = [{ id: 1, name: 'Test User' }];
+      const users = [withStats({ id: 1, name: 'Test User' })];
       repository.findAll.mockResolvedValue(users as any);
 
       const result = await service.findAll();
 
       expect(repository.findAll).toHaveBeenCalled();
-      expect(result).toEqual(users);
+      expect(result).toEqual([publicUser({ id: 1, name: 'Test User' })]);
     });
   });
 
   describe('findOne', () => {
     it('should return a user if found', async () => {
-      const user = { id: 1, name: 'Test User' };
+      const user = withStats({ id: 1, name: 'Test User' });
       repository.findById.mockResolvedValue(user as any);
 
       const result = await service.findOne(1);
 
       expect(repository.findById).toHaveBeenCalledWith(1);
-      expect(result).toEqual(user);
+      expect(result).toEqual(publicUser({ id: 1, name: 'Test User' }));
     });
 
     it('should throw NotFoundException if user not found', async () => {
@@ -120,10 +155,12 @@ describe('UsersService', () => {
   });
 
   it('should return pending organizers', async () => {
-    const users = [{ id: 1, role: 'organizer', pendingApproval: true }];
+    const users = [withStats({ id: 1, role: 'organizer', pendingApproval: true })];
     repository.findPendingOrganizers.mockResolvedValue(users as any);
 
-    await expect(service.findPendingOrganizers()).resolves.toEqual(users);
+    await expect(service.findPendingOrganizers()).resolves.toEqual([
+      publicUser({ id: 1, role: 'organizer' }),
+    ]);
     expect(repository.findPendingOrganizers).toHaveBeenCalled();
   });
 
@@ -136,29 +173,35 @@ describe('UsersService', () => {
   });
 
   it('should update user without hashing when password is absent', async () => {
-    const user = { id: 1, name: 'Updated' };
+    const user = withStats({ id: 1, name: 'Updated' });
     repository.update.mockResolvedValue(user as any);
 
-    await expect(service.update(1, { name: 'Updated' })).resolves.toEqual(user);
+    await expect(service.update(1, { name: 'Updated' })).resolves.toEqual(
+      publicUser({ id: 1, name: 'Updated' }),
+    );
     expect(repository.update).toHaveBeenCalledWith(1, { name: 'Updated' });
     expect(bcrypt.hash).not.toHaveBeenCalled();
   });
 
   it('should hash password when updating user password', async () => {
-    const user = { id: 1, passwordHash: 'newHash' };
+    const user = withStats({ id: 1, passwordHash: 'newHash' });
     (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
     (bcrypt.hash as jest.Mock).mockResolvedValue('newHash');
     repository.update.mockResolvedValue(user as any);
 
-    await expect(service.update(1, { password: 'newPassword' })).resolves.toEqual(user);
+    await expect(service.update(1, { password: 'newPassword' })).resolves.toEqual(
+      publicUser({ id: 1 }),
+    );
     expect(repository.update).toHaveBeenCalledWith(1, { passwordHash: 'newHash' });
   });
 
   it('should approve organizer requests', async () => {
-    const user = { id: 1, role: 'organizer', pendingApproval: false };
+    const user = withStats({ id: 1, role: 'organizer', pendingApproval: false });
     repository.update.mockResolvedValue(user as any);
 
-    await expect(service.approveOrganizer(1)).resolves.toEqual(user);
+    await expect(service.approveOrganizer(1)).resolves.toEqual(
+      publicUser({ id: 1, role: 'organizer' }),
+    );
     expect(repository.update).toHaveBeenCalledWith(1, {
       role: 'organizer',
       pendingApproval: false,
@@ -166,10 +209,12 @@ describe('UsersService', () => {
   });
 
   it('should reject organizer requests', async () => {
-    const user = { id: 1, role: 'user', pendingApproval: false };
+    const user = withStats({ id: 1, role: 'user', pendingApproval: false });
     repository.update.mockResolvedValue(user as any);
 
-    await expect(service.rejectOrganizer(1)).resolves.toEqual(user);
+    await expect(service.rejectOrganizer(1)).resolves.toEqual(
+      publicUser({ id: 1, role: 'user' }),
+    );
     expect(repository.update).toHaveBeenCalledWith(1, {
       role: 'user',
       pendingApproval: false,
@@ -177,10 +222,10 @@ describe('UsersService', () => {
   });
 
   it('should remove a user', async () => {
-    const user = { id: 1 };
+    const user = withStats({ id: 1 });
     repository.remove.mockResolvedValue(user as any);
 
-    await expect(service.remove(1)).resolves.toEqual(user);
+    await expect(service.remove(1)).resolves.toEqual(publicUser({ id: 1 }));
     expect(repository.remove).toHaveBeenCalledWith(1);
   });
 });

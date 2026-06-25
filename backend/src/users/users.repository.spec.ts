@@ -13,6 +13,17 @@ const mockPrisma = {
   },
 };
 
+const userStatsInclude = {
+  include: {
+    _count: {
+      select: {
+        eventsCreated: true,
+        eventsConfirmed: true,
+      },
+    },
+  },
+};
+
 describe('UsersRepository', () => {
   let repository: UsersRepository;
 
@@ -47,7 +58,7 @@ describe('UsersRepository', () => {
 
       const result = await repository.create(data);
 
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({ data });
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({ data, ...userStatsInclude });
       expect(result).toEqual(created);
     });
   });
@@ -59,7 +70,7 @@ describe('UsersRepository', () => {
 
       const result = await repository.findAll();
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalled();
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(userStatsInclude);
       expect(result).toEqual(users);
     });
   });
@@ -71,7 +82,10 @@ describe('UsersRepository', () => {
 
       const result = await repository.findById(1);
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+        ...userStatsInclude,
+      });
       expect(result).toEqual(user);
     });
 
@@ -115,6 +129,7 @@ describe('UsersRepository', () => {
 
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         where: { role: 'organizer', pendingApproval: true },
+        ...userStatsInclude,
       });
       expect(result).toEqual(users);
     });
@@ -154,6 +169,7 @@ describe('UsersRepository', () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: { name: 'Novo Nome' },
+        ...userStatsInclude,
       });
       expect(result).toEqual(updated);
     });
@@ -166,7 +182,10 @@ describe('UsersRepository', () => {
 
       const result = await repository.remove(1);
 
-      expect(mockPrisma.user.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(mockPrisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+        ...userStatsInclude,
+      });
       expect(result).toEqual(user);
     });
   });

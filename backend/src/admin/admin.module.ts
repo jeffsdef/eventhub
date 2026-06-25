@@ -8,5 +8,6 @@ import { UsersModule } from '../users/users.module';
   imports: [EventsModule, UsersModule],
   controllers: [AdminController],
   providers: [AdminService],
+  exports: [AdminService],
 })
 export class AdminModule {}

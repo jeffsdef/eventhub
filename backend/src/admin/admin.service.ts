@@ -40,7 +40,7 @@ export class AdminService {
       : 0;
 
     const totalRevenue = events.reduce((sum: number, event: any) => {
-      const confirmed = Array.isArray(event.confirmedUsers) ? event.confirmedUsers.length : 0;
+      const confirmed = Number(event.confirmed ?? 0);
       return sum + Number(event.price ?? 0) * confirmed;
     }, 0);
 

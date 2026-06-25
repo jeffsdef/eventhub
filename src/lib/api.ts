@@ -147,7 +147,7 @@ export function rejectOrganizer(id: number) {
 }
 
 export function getPlatformStats() {
-  return apiFetch<PlatformStats>('/admin/stats');
+  return apiFetch<PlatformStats>('/stats');
 }
 
 export function getRecentEvents() {
